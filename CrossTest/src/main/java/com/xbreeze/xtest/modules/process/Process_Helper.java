@@ -29,6 +29,10 @@ public class Process_Helper {
 	public void RunTemplatedProcess(String processConfig, String processName) throws Throwable{	
 		getProcessExecutor(processConfig).runProcess(_config.getProcessConfig(processConfig), processName);		
 	}
+
+	public void ExecuteCommand(String command_text) throws Throwable{	
+		getProcessExecutor("commandline").runProcess(_config.getProcessConfig("commandline"), command_text);
+	}	
 	
 	public void CloseProcessConnections() throws Throwable {
 		logger.info("Closing process connections");

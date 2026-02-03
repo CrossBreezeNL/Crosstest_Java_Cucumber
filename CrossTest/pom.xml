@@ -28,7 +28,7 @@
 	<artifactId>CrossTestCore</artifactId>
 
 	<properties>
-		<crosstest.version>1.0.21</crosstest.version>
+		<crosstest.version>1.0.22</crosstest.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<cucumber.version>7.8.1</cucumber.version>
 	</properties>

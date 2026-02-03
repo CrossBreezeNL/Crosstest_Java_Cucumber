@@ -29,7 +29,7 @@
 	<artifactId>TeradataCustomDataTypes</artifactId>
 
 	<properties>
-		<crosstest.version>1.0.21</crosstest.version>
+		<crosstest.version>1.0.22</crosstest.version>
 	</properties>
 
 	<version>${crosstest.version}</version>

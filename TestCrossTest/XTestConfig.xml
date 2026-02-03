@@ -279,6 +279,7 @@
 			</Parameters>
 		</ProcessConfig>
 		<ProcessConfig name="executordemo" container="Demo" processServerConfigName="executordemo" prefix="wf_m_"/>
+	   	<ProcessConfig name="commandline" processServerConfigName="commandline" />
 	</ProcessConfigs>
 
 	<ProcessServerConfigs>

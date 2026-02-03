@@ -11,7 +11,7 @@
 		<java.version>1.8</java.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<crosstest.version>1.0.21</crosstest.version>
+		<crosstest.version>1.0.22</crosstest.version>
 		<cucumber.version>7.8.1</cucumber.version>
 		<junit.version>5.9.1</junit.version>
 	</properties>
@@ -50,6 +50,15 @@
 			<groupId>com.x-breeze.test</groupId>
 			<artifactId>CrossTest</artifactId>
 			<version>${crosstest.version}</version>
+		</dependency>
+
+		<!-- JUnit 4 and Cucumber JUnit for JUnit 4 runner support -->
+		<!-- SLF4J Simple logger to provide a backend for SLF4J -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.36</version>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
