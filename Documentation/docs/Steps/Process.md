@@ -26,18 +26,34 @@ The details of every argument of the step are listed below.
  When I run the demo process load_Customer
 ```
 
-## Close process connections
-Close all process connections
+## Execute command
+Execute a command using commandline.          On windows it will run using cmd, while on other OS types it will use bash.
 
-### Hooks
-Below the hooks are given which are configured for this step. This means if you add the specified tag(s) on a scenario, the step will be executed automatically before or after (see Type) the scenario.
 
-| Type          | Tag(s)         | Description      |
+### Sentences
+| Type          | Language         | Sentence      |
 |:---           |:---              |:---           |
-| After |  |  |
+| When | en | I execute the following command |
+| When | nl | ik het volgende commando uitvoer |
 
 
+### Arguments
+The details of every argument of the step are listed below.
+
+| Parameter    | Datatype          | Description          |
+|:---          |:---               |:---                  |
+|command text | String | Command to be executed.                It can be written as a multiline and multi-statement command, and will be executed at once. |
+
+### Examples
 
 
+```gherkin
+ When I execute the following command
+```
+
+
+```gherkin
+ Wanneer ik het volgende commando uitvoer
+```
 
 

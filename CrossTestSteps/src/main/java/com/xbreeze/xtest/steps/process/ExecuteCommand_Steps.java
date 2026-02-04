@@ -3,9 +3,8 @@ import com.xbreeze.xtest.modules.process.Process_Helper;
 
 import io.cucumber.datatable.DataTable;
 
-import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
-import io.cucumber.java.nl.Gegeven;
+import io.cucumber.java.nl.Wanneer;
 
 public class ExecuteCommand_Steps
 {
@@ -17,7 +16,7 @@ public class ExecuteCommand_Steps
     }
 
     @When("I execute the following command")
-    public void Given_EN_ExecuteCommand(
+    public void When_EN_ExecuteCommand_D63315D3_F17C_4C05_BD7A_49A30F26A734(
         String command_text
     ) throws Throwable
     {
@@ -26,8 +25,8 @@ public class ExecuteCommand_Steps
         );
     }
 
-    @Gegeven("ik het volgende commando uitvoer")
-    public void Given_NL_ExecuteCommand(
+    @Wanneer("ik het volgende commando uitvoer")
+    public void When_NL_ExecuteCommand_86E23373_26FB_411C_90A0_1A397CC88524(
         String command_text
     ) throws Throwable
     {

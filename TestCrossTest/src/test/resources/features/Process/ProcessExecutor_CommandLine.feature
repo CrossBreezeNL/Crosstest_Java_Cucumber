@@ -64,8 +64,8 @@ Feature: ProcessExecutor - Command line execution
     echo First && echo Second
     """
 
-  Scenario: Run a command with a pipe
-    When I execute the following command
+  Scenario: Run a command with a pipe - NL
+    When ik het volgende commando uitvoer
     """
     echo Hello World | find "World"
     """
