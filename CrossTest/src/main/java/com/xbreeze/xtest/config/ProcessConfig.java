@@ -95,7 +95,9 @@ public class ProcessConfig {
 	}
 	
 	public void setProcessServerAndTemplateConfig(XTestConfig config) throws XTestException{
-		this._processServerConfig = config.getProcessServerConfig(_processServerConfigName);
+		if (_processServerConfigName != null && !_processServerConfigName.isEmpty()) {
+			this._processServerConfig = config.getProcessServerConfig(_processServerConfigName);
+		}
 		this._template = config.getObjectTemplateConfig(_templateName);
 	}
 	

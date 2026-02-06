@@ -1,4 +1,3 @@
-@Debug
 Feature: ProcessExecutor - Command line execution
   I want to execute arbitrary command line commands
 

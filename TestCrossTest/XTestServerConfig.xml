@@ -78,6 +78,5 @@
 					<Property name="Password" value="abc123" credentialProvider="testProvider"/>
 				</Properties>
 		</ProcessServerConfig>
-		<ProcessServerConfig name="commandline" executionClass="com.xbreeze.xtest.process.execution.CommandLineProcessExecutor"/>
 	</ProcessServerConfigs>
 </ServerConfigs>
