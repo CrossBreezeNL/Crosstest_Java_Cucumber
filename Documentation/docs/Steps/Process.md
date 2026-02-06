@@ -87,8 +87,8 @@ Empty segments are omitted. Each segment can be set in the ProcessConfig paramet
 | Segment | Description |
 |:--- |:--- |
 | command | The base command to execute (e.g., `dbt run`, `helm upgrade --install my-release my-chart`). |
-| starting_args | Arguments placed between the command and the feature args (e.g., `--full-refresh`). |
-| feature_args | The main arguments, built from the non-special rows in the arguments table. If no non-special rows are present, the default from the config is used. |
+| starting_args | Arguments placed between the command and the feature args (e.g., `--full-refresh` , `--install my-release my-chart`). |
+| feature_args | The main arguments, built from regular arguments (see [Argument defaults](#argument-defaults)) and the non-special rows in the arguments table. If no individual arguments exist (neither from config nor from the table), the `feature_args` string default from config is used as a fallback. |
 | ending_args | Arguments appended at the end (e.g., `--target dev`). |
 
 ### Arguments table
@@ -100,16 +100,42 @@ Each row in the arguments table has an `args` column and a `value` column. Rows 
 | `starting_args` | Overrides the starting_args segment from config. |
 | `ending_args` | Overrides the ending_args segment from config. |
 | Name with a dot (e.g., `vars.db`) | Grouped argument. See [Grouped arguments](#grouped-arguments). |
-| Any other name (e.g., `select`) | Regular feature argument. Formatted as `{arg_key_prefix}{name}{arg_key_value_separator}{value}`. |
+| Any other name (e.g., `select`) | Regular feature argument. Overrides a config default with the same name, or adds a new argument. Formatted as `{arg_key_prefix}{name}{arg_key_value_separator}{value}`. |
+
+### Argument defaults
+ProcessConfig parameters that are not reserved names and do not contain a dot are treated as **regular argument defaults**. These defaults are merged with the feature table entries:
+
+- Feature table entries with the same name **override** the config default value (keeping the feature table position).
+- Config defaults not mentioned in the feature table are **appended** after all feature table entries.
+- New feature table entries not in the config are placed in their table order.
+
+This allows you to define common arguments once in the config and override only specific values per scenario. See [Configuration examples](#configuration-examples) for a practical example.
+
+**Important:** Do not combine `feature_args` with argument defaults in the same ProcessConfig. When argument defaults are present, they take precedence and the `feature_args` fallback string is ignored. For example:
+
+```xml
+<!-- Do NOT do this: feature_args will never be used because select is an argument default -->
+<ProcessConfig name="broken_example">
+    <Parameters>
+        <Parameter name="command" value="dbt run"/>
+        <Parameter name="feature_args" value="--select my_default_model"/>
+        <Parameter name="select" value="other_model"/>
+    </Parameters>
+</ProcessConfig>
+```
+
+The `select` argument default makes the feature args segment non-empty, so `feature_args` is ignored entirely. The result would be `dbt run --select other_model`, not `dbt run --select my_default_model --select other_model`.
+
+Use either `feature_args` (a single pre-formatted string fallback) **or** argument defaults (individual named parameters), not both.
 
 ### ProcessConfig parameters
-The following parameters can be set in the ProcessConfig to control the command assembly and argument formatting.
+The following reserved parameters can be set in the ProcessConfig to control the command assembly and argument formatting. Any parameter not listed here and not containing a dot is treated as a regular argument default (see [Argument defaults](#argument-defaults)).
 
 | Parameter | Default | Description |
 |:--- |:--- |:--- |
 | `command` | _(empty)_ | The base command to execute. |
 | `starting_args` | _(empty)_ | Arguments placed before the feature args. |
-| `feature_args` | _(empty)_ | Default feature args, used when no non-special args are in the table. |
+| `feature_args` | _(empty)_ | Fallback feature args string, used only when no individual arguments exist (neither from config defaults nor from the table). |
 | `ending_args` | _(empty)_ | Arguments appended at the end. |
 | `arg_key_prefix` | `--` | Prefix for argument keys (e.g., `--` produces `--select`, `-D` produces `-Denv`). |
 | `arg_key_value_separator` | ` ` (space) | Separator between key and value (e.g., space produces `--select my_model`, `=` produces `-Denv=production`). |
@@ -158,6 +184,17 @@ Config-level parameters with dot-notation names (e.g., `vars.db=default_database
         <Parameter name="command" value="helm upgrade --install my-release my-chart"/>
         <Parameter name="group_entry_format" value="{key}={value}"/>
         <Parameter name="group_entry_separator" value=","/>
+    </Parameters>
+</ProcessConfig>
+```
+
+#### Tool with regular argument defaults
+```xml
+<ProcessConfig name="mytool">
+    <Parameters>
+        <Parameter name="command" value="mytool export"/>
+        <Parameter name="path" value="c:\data"/>
+        <Parameter name="format" value="csv"/>
     </Parameters>
 </ProcessConfig>
 ```
@@ -248,6 +285,29 @@ When I execute the dbt_with_defaults process using commandline with the followin
 Result: `dbt run --vars "{'db': 'other_database', 'ldts': '2025-01-01 00:00:00', 'user': 'myuser'}" --select view_met_logica --target dev`
 
 The `vars.db` default is overridden, `vars.ldts` is kept from config, and `vars.user` is added.
+
+#### Regular argument defaults from config
+Using the `mytool` config (which has `path=c:\data` and `format=csv` as defaults):
+
+```gherkin
+When I execute the mytool process using commandline with the following arguments:
+  | args   | value      |
+  | output | result.txt |
+```
+Result: `mytool export --output result.txt --path c:\data --format csv`
+
+The `output` argument is from the feature table. The `path` and `format` defaults from config are appended because they were not overridden.
+
+#### Overriding a config argument default
+```gherkin
+When I execute the mytool process using commandline with the following arguments:
+  | args   | value      |
+  | path   | d:\other   |
+  | output | result.txt |
+```
+Result: `mytool export --path d:\other --output result.txt --format csv`
+
+The `path` default is overridden by the feature table value. The `format` default is kept from config.
 
 #### Java-style arguments
 ```gherkin

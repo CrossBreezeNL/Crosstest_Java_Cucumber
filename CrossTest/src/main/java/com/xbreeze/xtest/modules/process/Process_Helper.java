@@ -2,10 +2,13 @@ package com.xbreeze.xtest.modules.process;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import com.xbreeze.xtest.config.ConfigProperty;
@@ -19,6 +22,8 @@ import com.xbreeze.xtest.exception.XTestProcessException;
 import com.xbreeze.xtest.modules.security.CredentialProvider_Helper;
 import com.xbreeze.xtest.process.execution.CommandLineProcessExecutor;
 import com.xbreeze.xtest.process.execution.ProcessExecutor;
+
+import io.cucumber.datatable.DataTable;
 
 public class Process_Helper {
 
@@ -53,7 +58,13 @@ public class Process_Helper {
 	 * The command is built from four segments: {command} {starting_args} {feature_args} {ending_args}.
 	 *
 	 * Special argument names in the table (command, starting_args, ending_args) override the corresponding
-	 * config values. All other arguments become feature_args, replacing the config default.
+	 * config values. All other arguments become feature_args, replacing the feature_args config default.
+	 *
+	 * Config-level parameters that are not reserved names (command, starting_args, feature_args, ending_args,
+	 * arg_key_prefix, arg_key_value_separator, arg_value_format, group_format, group_entry_format,
+	 * group_entry_separator) and do not contain a dot are treated as regular argument defaults. These are
+	 * merged with feature table entries: feature entries override config defaults with the same name, and
+	 * new feature entries are appended. Config defaults not overridden are kept.
 	 *
 	 * Dot-notation arguments (e.g., vars.db, vars.ldts) are grouped together and formatted using the
 	 * group_format, group_entry_format, and group_entry_separator config parameters.
@@ -65,7 +76,8 @@ public class Process_Helper {
 	 * @param processConfigName The name of the ProcessConfig to use.
 	 * @param argsTable The table of arguments with "args" and "value" columns.
 	 */
-	public void ExecuteCommandLineWithArgs(String processConfigName, List<Map<String, String>> argsTable) throws Throwable {
+	public void ExecuteTemplatedCommandProcesWithParameters(String processConfigName, DataTable dataTable) throws Throwable {
+		List<Map<String, String>> argsTable = dataTable.asMaps();
 		ProcessConfig processConfig = _config.getProcessConfig(processConfigName);
 		if (processConfig == null) {
 			throw new XTestProcessException(String.format("ProcessConfig '%s' not found", processConfigName));
@@ -82,9 +94,21 @@ public class Process_Helper {
 		String argKeyValueSeparator = getParameterValue(processConfig, "arg_key_value_separator", " ");
 		String argValueFormat = getParameterValue(processConfig, "arg_value_format", "{value}");
 
-		// Process table rows, supporting dot-notation grouped args (e.g., vars.db, vars.ldts)
-		ArrayList<String> featureArgParts = new ArrayList<>();
+		// Reserved parameter names that control command assembly and formatting, not treated as regular arguments
+		Set<String> reservedParams = new HashSet<>(Arrays.asList(
+			"command", "starting_args", "feature_args", "ending_args",
+			"arg_key_prefix", "arg_key_value_separator", "arg_value_format",
+			"group_format", "group_entry_format", "group_entry_separator"
+		));
+
+		// slotNames tracks the ordering of arguments (regular arg names and __GROUP__prefix placeholders).
+		// Feature table entries are processed first and define the initial order. Config-level defaults
+		// that are not referenced in the feature table are appended after all feature entries.
+		ArrayList<String> slotNames = new ArrayList<>();
+		LinkedHashMap<String, String> regularArgs = new LinkedHashMap<>();
 		LinkedHashMap<String, ArrayList<String[]>> groups = new LinkedHashMap<>();
+
+		// Process feature table rows first, establishing feature-defined order
 		for (Map<String, String> row : argsTable) {
 			String argName = row.get("args");
 			String argValue = row.get("value") != null ? row.get("value") : "";
@@ -101,40 +125,56 @@ public class Process_Helper {
 				String key = argName.substring(dotIndex + 1);
 				if (!groups.containsKey(prefix)) {
 					groups.put(prefix, new ArrayList<String[]>());
-					// Insert placeholder at the position of the first entry for this group
-					featureArgParts.add("__GROUP__" + prefix);
+					slotNames.add("__GROUP__" + prefix);
 				}
 				groups.get(prefix).add(new String[]{key, argValue});
 			} else {
-				String formattedValue = argValueFormat.replace("{value}", argValue);
-				featureArgParts.add(argKeyPrefix + argName + argKeyValueSeparator + formattedValue);
+				// Regular arg from feature table
+				if (!regularArgs.containsKey(argName)) {
+					slotNames.add(argName);
+				}
+				regularArgs.put(argName, argValue);
 			}
 		}
 
-		// Check for config-level group defaults (parameters with dot-notation names)
+		// Append config-level defaults not already provided by the feature table.
+		// Regular args not in the table are added with their config value.
+		// Group defaults not referenced in the table are registered so buildGroupArg picks them up.
 		for (ConfigProperty param : processConfig.getParameters()) {
-			String paramName = param.getName();
-			if (paramName.contains(".")) {
-				int dotIndex = paramName.indexOf('.');
-				String prefix = paramName.substring(0, dotIndex);
+			String name = param.getName();
+			if (reservedParams.contains(name)) {
+				continue;
+			}
+			if (name.contains(".")) {
+				int dotIndex = name.indexOf('.');
+				String prefix = name.substring(0, dotIndex);
 				if (!groups.containsKey(prefix)) {
 					groups.put(prefix, new ArrayList<String[]>());
-					featureArgParts.add("__GROUP__" + prefix);
+					slotNames.add("__GROUP__" + prefix);
+				}
+			} else {
+				if (!regularArgs.containsKey(name)) {
+					regularArgs.put(name, param.getValue() != null ? param.getValue() : "");
+					slotNames.add(name);
 				}
 			}
 		}
 
-		// Resolve group placeholders
-		for (int i = 0; i < featureArgParts.size(); i++) {
-			String part = featureArgParts.get(i);
-			if (part.startsWith("__GROUP__")) {
-				String prefix = part.substring("__GROUP__".length());
+		// Build featureArgParts from the merged slots (regular args + resolved groups), preserving order
+		ArrayList<String> featureArgParts = new ArrayList<>();
+		for (String slotName : slotNames) {
+			if (slotName.startsWith("__GROUP__")) {
+				String prefix = slotName.substring("__GROUP__".length());
 				String groupValue = buildGroupArg(processConfig, prefix, groups.get(prefix));
-				featureArgParts.set(i, argKeyPrefix + prefix + argKeyValueSeparator + groupValue);
+				featureArgParts.add(argKeyPrefix + prefix + argKeyValueSeparator + groupValue);
+			} else {
+				String value = regularArgs.get(slotName);
+				String formattedValue = argValueFormat.replace("{value}", value);
+				featureArgParts.add(argKeyPrefix + slotName + argKeyValueSeparator + formattedValue);
 			}
 		}
 
-		// If any non-special args found in table, replace feature_args with the concatenated result
+		// If any individual args found (from config or table), they replace the feature_args string default
 		if (!featureArgParts.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < featureArgParts.size(); i++) {

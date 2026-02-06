@@ -344,6 +344,32 @@
 				<Parameter name="arg_value_format" value="&quot;{value}&quot;"/>
 			</Parameters>
 		</ProcessConfig>
+		<ProcessConfig name="dbt_with_default_regular_args">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="select" value="my_default_model"/>
+				<Parameter name="ending_args" value="--target dev"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="tool_with_defaults">
+			<Parameters>
+				<Parameter name="command" value="echo mytool"/>
+				<Parameter name="path" value="c:\data"/>
+				<Parameter name="format" value="csv"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_with_default_regular_and_vars">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="select" value="my_default_model"/>
+				<Parameter name="ending_args" value="--target dev"/>
+				<Parameter name="group_format" value="&quot;{{entries}}&quot;"/>
+				<Parameter name="group_entry_format" value="'{key}': '{value}'"/>
+				<Parameter name="group_entry_separator" value=", "/>
+				<Parameter name="vars.db" value="default_database"/>
+				<Parameter name="vars.ldts" value="2025-01-01 00:00:00"/>
+			</Parameters>
+		</ProcessConfig>
 	</ProcessConfigs>
 
 	<ProcessServerConfigs>
