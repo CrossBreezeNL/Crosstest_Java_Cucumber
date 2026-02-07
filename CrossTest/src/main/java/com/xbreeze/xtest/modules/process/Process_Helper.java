@@ -31,7 +31,7 @@ public class Process_Helper {
 	private CredentialProvider_Helper _credentialProviderHelper;
 	static final Logger logger = Logger.getLogger(DataHelper.class.getName());
 	private HashMap<String, ProcessExecutor> _executors;
-	// Stores the last assembled command text from ExecuteCommandLineWithArgs, used for test assertions.
+	// Stores the last assembled command text from ExecuteTemplatedCommandProcesWithParameters, used for test assertions.
 	private String _lastAssembledCommand;
 
 	public Process_Helper(CredentialProvider_Helper credentialProviderHelper, XTestConfig cfg) throws XTestException{
@@ -101,17 +101,25 @@ public class Process_Helper {
 			"group_format", "group_entry_format", "group_entry_separator"
 		));
 
-		// slotNames tracks the ordering of arguments (regular arg names and __GROUP__prefix placeholders).
+		// slotNames tracks the ordering of arguments in the final command.
+		// It contains either regular arg names (e.g., "select") or group placeholders prefixed
+		// with "__GROUP__" (e.g., "__GROUP__vars"). These placeholders are resolved later into
+		// formatted group strings like: --vars "{'db': 'my_db', 'ldts': '2025-01-01'}"
 		// Feature table entries are processed first and define the initial order. Config-level defaults
 		// that are not referenced in the feature table are appended after all feature entries.
 		ArrayList<String> slotNames = new ArrayList<>();
+		// regularArgs maps argument names to their values (from feature table and/or config defaults)
 		LinkedHashMap<String, String> regularArgs = new LinkedHashMap<>();
+		// groups maps group prefixes (e.g., "vars") to their feature-level key-value entries
 		LinkedHashMap<String, ArrayList<String[]>> groups = new LinkedHashMap<>();
 
-		// Process feature table rows first, establishing feature-defined order
+		// Process feature table rows first, establishing feature-defined order.
+		// Each row is classified as: a special segment override, a grouped (dot-notation) arg, or a regular arg.
 		for (Map<String, String> row : argsTable) {
 			String argName = row.get("args");
 			String argValue = row.get("value") != null ? row.get("value") : "";
+
+			// Special segment overrides: these replace the corresponding config values directly
 			if ("command".equals(argName)) {
 				commandParam = argValue;
 			} else if ("starting_args".equals(argName)) {
@@ -119,17 +127,24 @@ public class Process_Helper {
 			} else if ("ending_args".equals(argName)) {
 				endingArgs = argValue;
 			} else if (argName.contains(".")) {
-				// Dot-notation: split on first dot into group prefix and key
+				// Dot-notation: split on first dot into group prefix and key.
+				// For example, "vars.db" becomes prefix="vars", key="db".
 				int dotIndex = argName.indexOf('.');
 				String prefix = argName.substring(0, dotIndex);
 				String key = argName.substring(dotIndex + 1);
+				// If this is the first entry for this group prefix, register a placeholder in the
+				// slot order so the group appears at this position in the final command.
 				if (!groups.containsKey(prefix)) {
 					groups.put(prefix, new ArrayList<String[]>());
 					slotNames.add("__GROUP__" + prefix);
 				}
+				// Add the key-value pair to the group. Multiple entries with the same prefix
+				// (e.g., vars.db and vars.ldts) are collected together and later formatted by buildGroupArg.
 				groups.get(prefix).add(new String[]{key, argValue});
 			} else {
-				// Regular arg from feature table
+				// Regular arg from feature table.
+				// If this arg name already exists (e.g., overriding a config default), update the value
+				// but keep its existing position. If it is new, register it in the slot order.
 				if (!regularArgs.containsKey(argName)) {
 					slotNames.add(argName);
 				}
@@ -138,14 +153,17 @@ public class Process_Helper {
 		}
 
 		// Append config-level defaults not already provided by the feature table.
-		// Regular args not in the table are added with their config value.
-		// Group defaults not referenced in the table are registered so buildGroupArg picks them up.
+		// This ensures that config arguments the feature table didn't mention are still included.
 		for (ConfigProperty param : processConfig.getParameters()) {
 			String name = param.getName();
+			// Skip reserved parameters (they control formatting, not arguments)
 			if (reservedParams.contains(name)) {
 				continue;
 			}
 			if (name.contains(".")) {
+				// Dot-notation config parameter (e.g., vars.db=default_database).
+				// Register the group if the feature table didn't already reference it.
+				// The actual config default values are merged later by buildGroupArg.
 				int dotIndex = name.indexOf('.');
 				String prefix = name.substring(0, dotIndex);
 				if (!groups.containsKey(prefix)) {
@@ -153,6 +171,8 @@ public class Process_Helper {
 					slotNames.add("__GROUP__" + prefix);
 				}
 			} else {
+				// Regular arg config default (e.g., select=my_default_model).
+				// Only add if the feature table didn't already provide a value for this arg.
 				if (!regularArgs.containsKey(name)) {
 					regularArgs.put(name, param.getValue() != null ? param.getValue() : "");
 					slotNames.add(name);
@@ -160,14 +180,19 @@ public class Process_Helper {
 			}
 		}
 
-		// Build featureArgParts from the merged slots (regular args + resolved groups), preserving order
+		// Resolve all slots into formatted argument strings, preserving the established order.
+		// Group placeholders are resolved by buildGroupArg which merges config defaults with
+		// feature entries. Regular args are formatted using the arg_key_prefix, separator, and value format.
 		ArrayList<String> featureArgParts = new ArrayList<>();
 		for (String slotName : slotNames) {
 			if (slotName.startsWith("__GROUP__")) {
+				// Resolve group placeholder into a formatted group argument
+				// e.g., "__GROUP__vars" -> --vars "{'db': 'my_db', 'ldts': '2025-01-01'}"
 				String prefix = slotName.substring("__GROUP__".length());
 				String groupValue = buildGroupArg(processConfig, prefix, groups.get(prefix));
 				featureArgParts.add(argKeyPrefix + prefix + argKeyValueSeparator + groupValue);
 			} else {
+				// Format a regular argument, e.g., "select" with value "my_model" -> --select my_model
 				String value = regularArgs.get(slotName);
 				String formattedValue = argValueFormat.replace("{value}", value);
 				featureArgParts.add(argKeyPrefix + slotName + argKeyValueSeparator + formattedValue);
@@ -218,9 +243,9 @@ public class Process_Helper {
 	}
 
 	/**
-	 * Returns the last assembled command text from ExecuteCommandLineWithArgs.
+	 * Returns the last assembled command text from ExecuteTemplatedCommandProcesWithParameters.
 	 * This is intended for test assertions to verify that the command was assembled correctly.
-	 * @return The last assembled command string, or null if ExecuteCommandLineWithArgs has not been called.
+	 * @return The last assembled command string, or null if ExecuteTemplatedCommandProcesWithParameters has not been called.
 	 */
 	public String getLastAssembledCommand() {
 		return _lastAssembledCommand;
@@ -314,8 +339,8 @@ public class Process_Helper {
 		
 	/**
 	 * Returns a cached CommandLineProcessExecutor instance, creating one if needed.
-	 * This executor is used by ExecuteCommand and ExecuteCommandLineWithArgs to run commandline processes
-	 * directly, without requiring a ProcessServerConfig binding in the XML config.
+	 * This executor is used by ExecuteCommand and ExecuteTemplatedCommandProcesWithParameters to run
+	 * commandline processes directly, without requiring a ProcessServerConfig binding in the XML config.
 	 * The instance is stored in the _executors map so it is cleaned up by CloseProcessConnections.
 	 */
 	private CommandLineProcessExecutor getCommandLineExecutor() {

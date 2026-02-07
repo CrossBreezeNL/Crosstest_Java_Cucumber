@@ -102,6 +102,8 @@ Each row in the arguments table has an `args` column and a `value` column. Rows 
 | Name with a dot (e.g., `vars.db`) | Grouped argument. See [Grouped arguments](#grouped-arguments). |
 | Any other name (e.g., `select`) | Regular feature argument. Overrides a config default with the same name, or adds a new argument. Formatted as `{arg_key_prefix}{name}{arg_key_value_separator}{value}`. |
 
+**Note:** The special segment parameters (`command`, `starting_args`, `ending_args`) and regular argument defaults (see [Argument defaults](#argument-defaults)) can be overridden from the feature table. However, formatting parameters (`arg_key_prefix`, `arg_key_value_separator`, `arg_value_format`, `group_format`, `group_entry_format`, `group_entry_separator`) can only be set in the ProcessConfig. Using a formatting parameter name in the feature table will not change the formatting — it will be treated as a regular argument.
+
 ### Argument defaults
 ProcessConfig parameters that are not reserved names and do not contain a dot are treated as **regular argument defaults**. These defaults are merged with the feature table entries:
 
