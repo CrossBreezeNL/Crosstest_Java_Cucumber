@@ -35,12 +35,14 @@ public class ProcessConfig {
 	private String _name;
 	private String _container;
 	private String _processServerConfigName;
+	private String _commandLineConfigName;
 	private String _processNamePrefix="";
 	private String _templateName = "";
 	private ObjectTemplateConfig _template;
 	ArrayList<ConfigProperty> _parameters = new ArrayList<>();
-	
+
 	private ProcessServerConfig _processServerConfig;
+	private CommandLineConfig _commandLineConfig;
 	
 	public ProcessConfig(String name, String processServerConfig, String container, String prefix) {
 		this._name = name;
@@ -70,7 +72,24 @@ public class ProcessConfig {
 	public void setProcessServerConfigName(String processServerConfigName) {
 		this._processServerConfigName = processServerConfigName;
 	}
-	
+
+	@XmlAttribute(name="commandLineConfigName")
+	public String getCommandLineConfigName() {
+		return this._commandLineConfigName;
+	}
+
+	public void setCommandLineConfigName(String commandLineConfigName) {
+		this._commandLineConfigName = commandLineConfigName;
+	}
+
+	public CommandLineConfig getCommandLineConfig() {
+		return this._commandLineConfig;
+	}
+
+	public void setCommandLineConfig(CommandLineConfig commandLineConfig) {
+		this._commandLineConfig = commandLineConfig;
+	}
+
 	public String getQualifiedProcessName(String processName) {		
 		return this._processNamePrefix.concat(processName);
 	}
@@ -97,6 +116,9 @@ public class ProcessConfig {
 	public void setProcessServerAndTemplateConfig(XTestConfig config) throws XTestException{
 		if (_processServerConfigName != null && !_processServerConfigName.isEmpty()) {
 			this._processServerConfig = config.getProcessServerConfig(_processServerConfigName);
+		}
+		if (_commandLineConfigName != null && !_commandLineConfigName.isEmpty()) {
+			this._commandLineConfig = config.getCommandLineConfig(_commandLineConfigName);
 		}
 		this._template = config.getObjectTemplateConfig(_templateName);
 	}

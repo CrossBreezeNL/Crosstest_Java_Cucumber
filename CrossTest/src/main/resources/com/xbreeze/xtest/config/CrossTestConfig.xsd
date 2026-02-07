@@ -5,6 +5,13 @@
 
   <xs:complexType name="xTestConfig">
     <xs:sequence>
+      <xs:element name="CommandLineConfigs" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="CommandLineConfig" type="commandLineConfig" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="CompositeObjects" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
@@ -189,6 +196,7 @@
       </xs:element>
       <xs:element name="template" type="objectTemplateConfig" minOccurs="0"/>
     </xs:sequence>
+    <xs:attribute name="commandLineConfigName" type="xs:string"/>
     <xs:attribute name="container" type="xs:string"/>
     <xs:attribute name="name" type="xs:string"/>
     <xs:attribute name="prefix" type="xs:string"/>
@@ -218,5 +226,16 @@
         <xs:attribute name="credentialProvider" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="commandLineConfig">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required"/>
+    <xs:attribute name="windowsTool" type="xs:string"/>
+    <xs:attribute name="windowsToolFlag" type="xs:string"/>
+    <xs:attribute name="otherTool" type="xs:string"/>
+    <xs:attribute name="otherToolFlag" type="xs:string"/>
+    <xs:attribute name="windowsWorkingDirectory" type="xs:string"/>
+    <xs:attribute name="otherWorkingDirectory" type="xs:string"/>
   </xs:complexType>
 </xs:schema>

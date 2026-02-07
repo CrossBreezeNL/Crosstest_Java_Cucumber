@@ -27,7 +27,7 @@ The details of every argument of the step are listed below.
 ```
 
 ## Execute command
-Execute a command using commandline. On windows it will run using cmd, while on other OS types it will use bash.
+Execute a command using commandline. On Windows it will run using `cmd.exe /c`, while on other OS types it will use `bash -c`.
 
 
 ### Sentences
@@ -42,22 +42,139 @@ The details of every argument of the step are listed below.
 
 | Parameter    | Datatype          | Description          |
 |:---          |:---               |:---                  |
-|command text | String | Command to be executed. It can be written as a multiline and multi-statement command, and will be executed at once. |
+| command text | String | Command to be executed. It can be written as a multiline and multi-statement command, and will be executed at once. |
 
 ### Examples
 
-
 ```gherkin
- When I execute the following command
+When I execute the following command
+"""
+echo Hello World
+"""
 ```
 
+```gherkin
+Wanneer ik het volgende commando uitvoer
+"""
+echo Hello World
+"""
+```
+
+## Execute command on specific OS
+Execute a command using commandline, but only on the specified operating system. When the OS does not match, the step is silently skipped and the scenario continues without error. This is useful for platform-specific commands (e.g., `findstr` on Windows, `grep` on non-Windows).
+
+
+### Sentences
+| Type          | Language         | Sentence      |
+|:---           |:---              |:---           |
+| When | en | `^I execute the following command on (windows\|non-windows) os:$` |
+| When | nl | `^ik het volgende commando uitvoer op (windows\|niet-windows) os:$` |
+
+
+### Arguments
+The details of every argument of the step are listed below.
+
+| Parameter    | Datatype          | Description          |
+|:---          |:---               |:---                  |
+| command text | String | Command to be executed. It can be written as a multiline and multi-statement command, and will be executed at once. |
+| os type | String | `windows` or `non-windows`. When specified, the command only runs on the matching OS; otherwise it is silently skipped. |
+
+### Examples
 
 ```gherkin
- Wanneer ik het volgende commando uitvoer
+When I execute the following command on windows os:
+"""
+echo Hello World | findstr "World"
+"""
+```
+
+```gherkin
+When I execute the following command on non-windows os:
+"""
+echo Hello World | grep "World"
+"""
+```
+
+```gherkin
+Wanneer ik het volgende commando uitvoer op windows os:
+"""
+echo Hello World | findstr "World"
+"""
+```
+
+## Execute command on specific commandline
+Execute a command using a specific [CommandLineConfig](#commandlineconfig) instead of the default shell.
+
+
+### Sentences
+| Type          | Language         | Sentence      |
+|:---           |:---              |:---           |
+| When | en | `^I execute the following ([a-zA-Z0-9_@$#]+) command:$` |
+| When | nl | `^ik het volgende ([a-zA-Z0-9_@$#]+) commando uitvoer:$` |
+
+
+### Arguments
+The details of every argument of the step are listed below.
+
+| Parameter    | Datatype          | Description          |
+|:---          |:---               |:---                  |
+| command text | String | Command to be executed. It can be written as a multiline and multi-statement command, and will be executed at once. |
+| commandline config | String | Name of a [CommandLineConfig](#commandlineconfig) to use instead of the default shell. |
+
+### Examples
+
+```gherkin
+When I execute the following powershell command:
+"""
+Write-Output 'Hello from PowerShell'
+"""
+```
+
+```gherkin
+Wanneer ik het volgende powershell commando uitvoer:
+"""
+Write-Output 'Hello from PowerShell'
+"""
+```
+
+## Execute command on specific commandline and OS
+Execute a command using a specific [CommandLineConfig](#commandlineconfig), but only on the specified operating system. Combines the behavior of [Execute command on specific OS](#execute-command-on-specific-os) and [Execute command on specific commandline](#execute-command-on-specific-commandline).
+
+
+### Sentences
+| Type          | Language         | Sentence      |
+|:---           |:---              |:---           |
+| When | en | `^I execute the following ([a-zA-Z0-9_@$#]+) command on (windows\|non-windows) os:$` |
+| When | nl | `^ik het volgende ([a-zA-Z0-9_@$#]+) commando uitvoer op (windows\|niet-windows) os:$` |
+
+
+### Arguments
+The details of every argument of the step are listed below.
+
+| Parameter    | Datatype          | Description          |
+|:---          |:---               |:---                  |
+| command text | String | Command to be executed. It can be written as a multiline and multi-statement command, and will be executed at once. |
+| commandline config | String | Name of a [CommandLineConfig](#commandlineconfig) to use instead of the default shell. |
+| os type | String | `windows` or `non-windows`. When specified, the command only runs on the matching OS; otherwise it is silently skipped. |
+
+### Examples
+
+```gherkin
+When I execute the following powershell command on windows os:
+"""
+Write-Output 'PowerShell on Windows'
+"""
+```
+
+```gherkin
+Wanneer ik het volgende powershell commando uitvoer op niet-windows os:
+"""
+echo 'PowerShell on other'
+"""
 ```
 
 ## Execute commandline with arguments
-Execute a commandline process with configurable arguments. The command is assembled from a ProcessConfig and a table of arguments provided in the feature file. On Windows it will run using cmd, while on other OS types it will use bash.
+Execute a commandline process with configurable arguments. The command is assembled from a ProcessConfig and a table of arguments provided in the feature file. By default, on Windows it will run using cmd, while on other OS types it will use bash. This can be customized using a [CommandLineConfig](#commandlineconfig).
 
 This step does not require a ProcessServerConfig binding. The CommandLineProcessExecutor is used directly.
 
@@ -73,7 +190,7 @@ The details of every argument of the step are listed below.
 | Parameter    | Datatype          | Description          |
 |:---          |:---               |:---                  |
 | process config | String | Name of the ProcessConfig to use |
-| arguments table | DataTable | Table with `args` and `value` columns containing the arguments |
+| arguments table | DataTable | Two-column table where the first column is the argument name and the second column is the value. Column headers can be freely chosen. |
 
 ### Command assembly
 The command is assembled from four segments in this order:
@@ -92,9 +209,9 @@ Empty segments are omitted. Each segment can be set in the ProcessConfig paramet
 | ending_args | Arguments appended at the end (e.g., `--target dev`). |
 
 ### Arguments table
-Each row in the arguments table has an `args` column and a `value` column. Rows are processed as follows:
+Each row in the arguments table has two columns: the first column is the argument name and the second column is the value. Rows are processed as follows:
 
-| args value | Behavior |
+| First column | Behavior |
 |:--- |:--- |
 | `command` | Overrides the command segment from config. |
 | `starting_args` | Overrides the starting_args segment from config. |
@@ -327,3 +444,96 @@ Wanneer ik het dbt proces uitvoer via commandline met de volgende argumenten:
   | select | my_model |
 ```
 Result: `dbt run --select my_model --target dev`
+
+## Execute commandline with arguments on specific commandline
+Execute a commandline process with configurable arguments on a specific commandline configuration. This step is identical to [Execute commandline with arguments](#execute-commandline-with-arguments), but allows specifying a [CommandLineConfig](#commandlineconfig) to override the shell, tool flags, and working directory at execution time.
+
+The commandline config specified in the step sentence overrides any `commandLineConfigName` set on the ProcessConfig.
+
+### Sentences
+| Type          | Language         | Sentence      |
+|:---           |:---              |:---           |
+| When | en | ^I execute the ([a-zA-Z0-9_@$#]+) process on ([a-zA-Z0-9_@$#]+) with the following arguments:$ |
+| When | nl | ^ik het ([a-zA-Z0-9_@$#]+) proces uitvoer op ([a-zA-Z0-9_@$#]+) met de volgende argumenten:$ |
+
+### Arguments
+| Parameter    | Datatype          | Description          |
+|:---          |:---               |:---                  |
+| process config | String | Name of the ProcessConfig to use |
+| commandline config | String | Name of the CommandLineConfig to use |
+| arguments table | DataTable | Two-column table where the first column is the argument name and the second column is the value. Column headers can be freely chosen. |
+
+### Examples
+
+#### Execution-time override
+```gherkin
+When I execute the dbt process on powershell with the following arguments:
+  | args   | value    |
+  | select | my_model |
+```
+
+#### Dutch (NL) variant
+```gherkin
+Wanneer ik het dbt proces uitvoer op powershell met de volgende argumenten:
+  | args   | value    |
+  | select | my_model |
+```
+
+## CommandLineConfig
+The `CommandLineConfig` element allows you to configure the shell, tool flags, and working directory used by commandline execution steps. By default, `cmd.exe /c` is used on Windows and `bash -c` on other platforms. A CommandLineConfig lets you override these defaults.
+
+### XML configuration
+
+CommandLineConfigs are defined inside a `CommandLineConfigs` wrapper element in the XTestConfig:
+
+```xml
+<XTestConfig>
+  <CommandLineConfigs>
+    <CommandLineConfig name="powershell"
+      windowsTool="powershell.exe" windowsToolFlag="-Command"
+      otherTool="pwsh" otherToolFlag="-Command"/>
+    <CommandLineConfig name="custom_workdir"
+      windowsWorkingDirectory="C:\workdir" otherWorkingDirectory="/opt/workdir"/>
+  </CommandLineConfigs>
+  ...
+</XTestConfig>
+```
+
+### Attributes
+
+| Attribute | Required | Default | Description |
+|:--- |:--- |:--- |:--- |
+| `name` | Yes | | Unique name to reference this config. |
+| `windowsTool` | No | `cmd.exe` | The shell executable to use on Windows. |
+| `windowsToolFlag` | No | `/c` | The flag passed to the Windows shell to execute a command string. |
+| `otherTool` | No | `bash` | The shell executable to use on non-Windows platforms. |
+| `otherToolFlag` | No | `-c` | The flag passed to the non-Windows shell to execute a command string. |
+| `windowsWorkingDirectory` | No | _(inherit)_ | Working directory for command execution on Windows. |
+| `otherWorkingDirectory` | No | _(inherit)_ | Working directory for command execution on non-Windows platforms. |
+
+### Binding a CommandLineConfig to a ProcessConfig
+
+You can bind a CommandLineConfig to a ProcessConfig at config time using the `commandLineConfigName` attribute:
+
+```xml
+<ProcessConfig name="dbt_custom" commandLineConfigName="powershell">
+  <Parameters>
+    <Parameter name="command" value="dbt run"/>
+    <Parameter name="ending_args" value="--target dev"/>
+  </Parameters>
+</ProcessConfig>
+```
+
+When this ProcessConfig is used in an "execute commandline with arguments" step, it will automatically use the referenced CommandLineConfig.
+
+### Execution-time override
+
+The "on {commandline config}" step sentence allows overriding the CommandLineConfig at execution time, regardless of what is configured on the ProcessConfig:
+
+```gherkin
+When I execute the dbt process on powershell with the following arguments:
+  | args   | value    |
+  | select | my_model |
+```
+
+This is useful when the same ProcessConfig needs to run with different shell configurations in different scenarios.

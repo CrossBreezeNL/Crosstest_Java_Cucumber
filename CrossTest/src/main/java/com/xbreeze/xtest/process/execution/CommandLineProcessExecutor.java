@@ -3,9 +3,11 @@
 // It supports both Windows and Unix-like systems, and captures the output for verification.
 package com.xbreeze.xtest.process.execution;
 
+import com.xbreeze.xtest.config.CommandLineConfig;
 import com.xbreeze.xtest.config.ProcessConfig;
 import com.xbreeze.xtest.exception.XTestProcessException;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -17,7 +19,13 @@ import java.io.InputStreamReader;
  */
 public class CommandLineProcessExecutor implements ProcessExecutor {
     // Holds the output of the executed command
-    private static String commandOutput  = null;
+    private String commandOutput  = null;
+    // Holds just the assembled command text (without shell tool prefix)
+    private String lastCommandText = null;
+    // Holds the Windows execution tool prefix (e.g., "cmd.exe /c")
+    private String lastWindowsToolPrefix = null;
+    // Holds the other OS execution tool prefix (e.g., "bash -c")
+    private String lastOtherToolPrefix = null;
     // Reference to the currently running process, used for cleanup
     private Process process = null;
 
@@ -33,7 +41,7 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
 
     /**
      * Executes the given command using the appropriate shell for the OS.
-     * Captures and stores the output. Throws an exception if the command fails.
+     * Delegates to the overloaded method with no CommandLineConfig.
      *
      * @param config  The process configuration (not used for command line execution)
      * @param command The command to execute
@@ -41,15 +49,61 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
      */
     @Override
     public void runProcess(ProcessConfig config, String command) throws XTestProcessException {
-        // Detect the operating system to choose the correct shell
-        String os = System.getProperty("os.name").toLowerCase();
-        ProcessBuilder builder;
-        if (os.contains("win")) {
-            // On Windows, use cmd.exe to interpret the command string
-            builder = new ProcessBuilder("cmd.exe", "/c", command);
+        runProcess(config, command, null);
+    }
+
+    /**
+     * Executes the given command using the shell specified in the CommandLineConfig,
+     * or the OS-appropriate default shell if clConfig is null.
+     * Captures and stores the output. Throws an exception if the command fails.
+     *
+     * @param config   The process configuration (not used for command line execution)
+     * @param command  The command to execute
+     * @param clConfig The commandline configuration specifying tool, flags, and working directory (may be null)
+     * @throws XTestProcessException if the command fails or an error occurs
+     */
+    public void runProcess(ProcessConfig config, String command, CommandLineConfig clConfig) throws XTestProcessException {
+        String tool;
+        String toolFlag;
+        String workingDirectory;
+        String windowsTool;
+        String windowsToolFlag;
+        String otherTool;
+        String otherToolFlag;
+
+        if (clConfig != null) {
+            tool = clConfig.getEffectiveTool();
+            toolFlag = clConfig.getEffectiveToolFlag();
+            workingDirectory = clConfig.getEffectiveWorkingDirectory();
+            windowsTool = clConfig.getWindowsTool();
+            windowsToolFlag = clConfig.getWindowsToolFlag();
+            otherTool = clConfig.getOtherTool();
+            otherToolFlag = clConfig.getOtherToolFlag();
         } else {
-            // On Unix-like systems, use bash to interpret the command string
-            builder = new ProcessBuilder("bash", "-c", command);
+            // Default behavior: detect OS and use default shell
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("win")) {
+                tool = "cmd.exe";
+                toolFlag = "/c";
+            } else {
+                tool = "bash";
+                toolFlag = "-c";
+            }
+            workingDirectory = null;
+            windowsTool = "cmd.exe";
+            windowsToolFlag = "/c";
+            otherTool = "bash";
+            otherToolFlag = "-c";
+        }
+
+        // Store the command text and both OS tool prefixes separately for verification
+        lastCommandText = command;
+        lastWindowsToolPrefix = windowsTool + " " + windowsToolFlag;
+        lastOtherToolPrefix = otherTool + " " + otherToolFlag;
+
+        ProcessBuilder builder = new ProcessBuilder(tool, toolFlag, command);
+        if (workingDirectory != null && !workingDirectory.isEmpty()) {
+            builder.directory(new File(workingDirectory));
         }
         // Merge stderr with stdout so all output is captured together
         builder.redirectErrorStream(true);
@@ -65,19 +119,19 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
             }
             // Wait for the process to finish and get the exit code
             int exitCode = process.waitFor();
-            commandOutput  = output.toString();
+            commandOutput = output.toString();
             if (exitCode != 0) {
                 // Throw an exception if the command failed (non-zero exit code)
-                throw new XTestProcessException("Command failed with exit code: " + exitCode + "\nOutput:\n" + commandOutput );
+                throw new XTestProcessException("Command failed with exit code: " + exitCode + "\nOutput:\n" + commandOutput);
             }
         } catch (IOException | InterruptedException e) {
             // Capture any output produced before the error/exception
-            commandOutput  = output.toString();
+            commandOutput = output.toString();
             // Ensure the process is killed if an error occurs
             if (process != null && process.isAlive()) {
                 process.destroyForcibly();
             }
-            throw new XTestProcessException("Error running command: " + e.getMessage() + "\nOutput:\n" + commandOutput );
+            throw new XTestProcessException("Error running command: " + e.getMessage() + "\nOutput:\n" + commandOutput);
         }
     }
 
@@ -89,6 +143,30 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
     public void cleanUp() throws XTestProcessException {
         if (process != null && process.isAlive()) {
             process.destroyForcibly();
+        }
+    }
+
+    /**
+     * Returns the assembled command text without the shell tool prefix.
+     * For example: "echo dbt run --select my_model --target dev"
+     * @return The command text, or null if no command has been executed.
+     */
+    public String getLastCommandText() {
+        return lastCommandText;
+    }
+
+    /**
+     * Returns the execution tool prefix for the specified OS type.
+     * For "windows": e.g., "cmd.exe /c"
+     * For "non-windows": e.g., "bash -c"
+     * @param osType "windows" or "non-windows"
+     * @return The tool prefix string, or null if no command has been executed.
+     */
+    public String getLastToolPrefix(String osType) {
+        if ("windows".equals(osType)) {
+            return lastWindowsToolPrefix;
+        } else {
+            return lastOtherToolPrefix;
         }
     }
 }

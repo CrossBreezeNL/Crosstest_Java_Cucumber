@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import com.xbreeze.xtest.config.CommandLineConfig;
 import com.xbreeze.xtest.config.ConfigProperty;
 import com.xbreeze.xtest.config.ProcessConfig;
 import com.xbreeze.xtest.config.ProcessServerConfig;
@@ -31,8 +32,6 @@ public class Process_Helper {
 	private CredentialProvider_Helper _credentialProviderHelper;
 	static final Logger logger = Logger.getLogger(DataHelper.class.getName());
 	private HashMap<String, ProcessExecutor> _executors;
-	// Stores the last assembled command text from ExecuteTemplatedCommandProcesWithParameters, used for test assertions.
-	private String _lastAssembledCommand;
 
 	public Process_Helper(CredentialProvider_Helper credentialProviderHelper, XTestConfig cfg) throws XTestException{
 		this._config = cfg.getConfig();
@@ -51,6 +50,42 @@ public class Process_Helper {
 	 */
 	public void ExecuteCommand(String command_text) throws Throwable{
 		getCommandLineExecutor().runProcess(null, command_text);
+	}
+
+	/**
+	 * Executes a raw command string on the commandline, but only if the current OS matches the given osType.
+	 * If the OS does not match, the command is silently skipped.
+	 * @param command_text The command to execute.
+	 * @param osType "windows" or "non-windows".
+	 */
+	public void ExecuteCommandForOs(String command_text, String osType) throws Throwable{
+		if (isCurrentOs(osType)) {
+			ExecuteCommand(command_text);
+		}
+	}
+
+	/**
+	 * Executes a raw command string on the commandline using a specific CommandLineConfig,
+	 * but only if the current OS matches the given osType.
+	 * If the OS does not match, the command is silently skipped.
+	 * @param command_text The command to execute.
+	 * @param commandLineConfigName The name of the CommandLineConfig to use.
+	 * @param osType "windows" or "non-windows".
+	 */
+	public void ExecuteCommandForOs(String command_text, String commandLineConfigName, String osType) throws Throwable{
+		if (isCurrentOs(osType)) {
+			ExecuteCommand(command_text, commandLineConfigName);
+		}
+	}
+
+	/**
+	 * Executes a raw command string on the commandline using a specific CommandLineConfig.
+	 * @param command_text The command to execute.
+	 * @param commandLineConfigName The name of the CommandLineConfig to use.
+	 */
+	public void ExecuteCommand(String command_text, String commandLineConfigName) throws Throwable{
+		CommandLineConfig clConfig = _config.getCommandLineConfig(commandLineConfigName);
+		getCommandLineExecutor().runProcess(null, command_text, clConfig);
 	}
 
 	/**
@@ -74,10 +109,10 @@ public class Process_Helper {
 	 * Uses CommandLineProcessExecutor directly, so no ProcessServerConfig binding is required in the XML config.
 	 *
 	 * @param processConfigName The name of the ProcessConfig to use.
-	 * @param argsTable The table of arguments with "args" and "value" columns.
+	 * @param dataTable The table of arguments. The first column is the argument name, the second column is the value.
 	 */
 	public void ExecuteTemplatedCommandProcesWithParameters(String processConfigName, DataTable dataTable) throws Throwable {
-		List<Map<String, String>> argsTable = dataTable.asMaps();
+		List<List<String>> argsTable = dataTable.asLists();
 		ProcessConfig processConfig = _config.getProcessConfig(processConfigName);
 		if (processConfig == null) {
 			throw new XTestProcessException(String.format("ProcessConfig '%s' not found", processConfigName));
@@ -113,11 +148,12 @@ public class Process_Helper {
 		// groups maps group prefixes (e.g., "vars") to their feature-level key-value entries
 		LinkedHashMap<String, ArrayList<String[]>> groups = new LinkedHashMap<>();
 
-		// Process feature table rows first, establishing feature-defined order.
+		// Process feature table rows first (skip header row), establishing feature-defined order.
 		// Each row is classified as: a special segment override, a grouped (dot-notation) arg, or a regular arg.
-		for (Map<String, String> row : argsTable) {
-			String argName = row.get("args");
-			String argValue = row.get("value") != null ? row.get("value") : "";
+		for (int i = 1; i < argsTable.size(); i++) {
+			List<String> row = argsTable.get(i);
+			String argName = row.get(0);
+			String argValue = row.size() > 1 && row.get(1) != null ? row.get(1) : "";
 
 			// Special segment overrides: these replace the corresponding config values directly
 			if ("command".equals(argName)) {
@@ -236,19 +272,56 @@ public class Process_Helper {
 		}
 
 		String commandText = command.toString().trim();
-		// Store the assembled command so it can be verified in test assertions via getLastAssembledCommand().
-		_lastAssembledCommand = commandText;
 		logger.info(String.format("Executing commandline with args for process '%s': %s", processConfigName, commandText));
-		getCommandLineExecutor().runProcess(processConfig, commandText);
+		// Use the CommandLineConfig from the ProcessConfig if available
+		CommandLineConfig clConfig = processConfig.getCommandLineConfig();
+		getCommandLineExecutor().runProcess(processConfig, commandText, clConfig);
 	}
 
 	/**
-	 * Returns the last assembled command text from ExecuteTemplatedCommandProcesWithParameters.
-	 * This is intended for test assertions to verify that the command was assembled correctly.
-	 * @return The last assembled command string, or null if ExecuteTemplatedCommandProcesWithParameters has not been called.
+	 * Assembles and executes a commandline process using a ProcessConfig, a table of arguments,
+	 * and an explicit CommandLineConfig name that overrides the ProcessConfig's binding.
+	 *
+	 * @param processConfigName The name of the ProcessConfig to use.
+	 * @param dataTable The table of arguments with "args" and "value" columns.
+	 * @param commandLineConfigName The name of the CommandLineConfig to use (overrides config-time binding).
+	 */
+	public void ExecuteTemplatedCommandProcesWithParameters(String processConfigName, DataTable dataTable, String commandLineConfigName) throws Throwable {
+		// Resolve the explicit CommandLineConfig before delegating to the main method,
+		// then temporarily set it on the ProcessConfig so the main method picks it up.
+		ProcessConfig processConfig = _config.getProcessConfig(processConfigName);
+		CommandLineConfig originalConfig = processConfig.getCommandLineConfig();
+		CommandLineConfig overrideConfig = _config.getCommandLineConfig(commandLineConfigName);
+		try {
+			// Temporarily override
+			processConfig.setCommandLineConfig(overrideConfig);
+			ExecuteTemplatedCommandProcesWithParameters(processConfigName, dataTable);
+		} finally {
+			// Restore original
+			processConfig.setCommandLineConfig(originalConfig);
+		}
+	}
+
+	/**
+	 * Returns the assembled command text without the shell tool prefix.
+	 * For example: "echo dbt run --select my_model --target dev"
+	 * This is intended for test assertions to verify the command assembly logic.
+	 * @return The command text, or null if no command has been executed.
 	 */
 	public String getLastAssembledCommand() {
-		return _lastAssembledCommand;
+		return getCommandLineExecutor().getLastCommandText();
+	}
+
+	/**
+	 * Returns the execution tool prefix for the specified OS type.
+	 * For "windows": e.g., "cmd.exe /c"
+	 * For "non-windows": e.g., "bash -c"
+	 * This is intended for test assertions to verify the execution tool configuration.
+	 * @param osType "windows" or "non-windows"
+	 * @return The tool prefix string, or null if no command has been executed.
+	 */
+	public String getLastExecutionToolPrefix(String osType) {
+		return getCommandLineExecutor().getLastToolPrefix(osType);
 	}
 
 	/**
@@ -337,6 +410,17 @@ public class Process_Helper {
 		}
 	}
 		
+	/**
+	 * Checks whether the current OS matches the given osType.
+	 * @param osType "windows" or "non-windows"
+	 * @return true if the current OS matches the given type
+	 */
+	private boolean isCurrentOs(String osType) {
+		String os = System.getProperty("os.name").toLowerCase();
+		boolean isWindows = os.contains("win");
+		return (isWindows && "windows".equals(osType)) || (!isWindows && "non-windows".equals(osType));
+	}
+
 	/**
 	 * Returns a cached CommandLineProcessExecutor instance, creating one if needed.
 	 * This executor is used by ExecuteCommand and ExecuteTemplatedCommandProcesWithParameters to run

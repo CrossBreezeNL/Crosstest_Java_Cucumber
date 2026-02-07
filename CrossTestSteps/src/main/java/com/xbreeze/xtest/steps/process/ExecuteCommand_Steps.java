@@ -35,5 +35,82 @@ public class ExecuteCommand_Steps
         );
     }
 
+    @When("^I execute the following command on (windows|non-windows) os:$")
+    public void When_EN_ExecuteCommandOnOs(
+        String osType,
+        String command_text
+    ) throws Throwable
+    {
+        _Process_helper.ExecuteCommandForOs(
+            command_text,
+            osType
+        );
+    }
+
+    @Wanneer("^ik het volgende commando uitvoer op (windows|niet-windows) os:$")
+    public void When_NL_ExecuteCommandOnOs(
+        String osType,
+        String command_text
+    ) throws Throwable
+    {
+        String nlToEn = "niet-windows".equals(osType) ? "non-windows" : osType;
+        _Process_helper.ExecuteCommandForOs(
+            command_text,
+            nlToEn
+        );
+    }
+
+    @When("^I execute the following ([a-zA-Z0-9_@$#]+) command:$")
+    public void When_EN_ExecuteCommandWithConfig(
+        String commandLineConfigName,
+        String command_text
+    ) throws Throwable
+    {
+        _Process_helper.ExecuteCommand(
+            command_text,
+            commandLineConfigName
+        );
+    }
+
+    @Wanneer("^ik het volgende ([a-zA-Z0-9_@$#]+) commando uitvoer:$")
+    public void When_NL_ExecuteCommandWithConfig(
+        String commandLineConfigName,
+        String command_text
+    ) throws Throwable
+    {
+        _Process_helper.ExecuteCommand(
+            command_text,
+            commandLineConfigName
+        );
+    }
+
+    @When("^I execute the following ([a-zA-Z0-9_@$#]+) command on (windows|non-windows) os:$")
+    public void When_EN_ExecuteCommandWithConfigOnOs(
+        String commandLineConfigName,
+        String osType,
+        String command_text
+    ) throws Throwable
+    {
+        _Process_helper.ExecuteCommandForOs(
+            command_text,
+            commandLineConfigName,
+            osType
+        );
+    }
+
+    @Wanneer("^ik het volgende ([a-zA-Z0-9_@$#]+) commando uitvoer op (windows|niet-windows) os:$")
+    public void When_NL_ExecuteCommandWithConfigOnOs(
+        String commandLineConfigName,
+        String osType,
+        String command_text
+    ) throws Throwable
+    {
+        String nlToEn = "niet-windows".equals(osType) ? "non-windows" : osType;
+        _Process_helper.ExecuteCommandForOs(
+            command_text,
+            commandLineConfigName,
+            nlToEn
+        );
+    }
 
 }

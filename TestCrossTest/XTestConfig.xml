@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <XTestConfig xmlns:xi="http://www.w3.org/2001/XInclude" debug="true" emptyStringValue="''">
 
+	<CommandLineConfigs>
+		<CommandLineConfig name="powershell"
+			windowsTool="powershell.exe" windowsToolFlag="-Command"
+			otherTool="pwsh" otherToolFlag="-Command"/>
+		<CommandLineConfig name="default_shell"/>
+		<CommandLineConfig name="custom_workdir"
+			windowsWorkingDirectory="C:\temp" otherWorkingDirectory="/tmp"/>
+	</CommandLineConfigs>
+
 	<CompositeObjects>
 		<CompositeObject name="Customer">
 			<ContextTables>
@@ -368,6 +377,12 @@
 				<Parameter name="group_entry_separator" value=", "/>
 				<Parameter name="vars.db" value="default_database"/>
 				<Parameter name="vars.ldts" value="2025-01-01 00:00:00"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_with_clconfig" commandLineConfigName="default_shell">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="ending_args" value="--target dev"/>
 			</Parameters>
 		</ProcessConfig>
 	</ProcessConfigs>
