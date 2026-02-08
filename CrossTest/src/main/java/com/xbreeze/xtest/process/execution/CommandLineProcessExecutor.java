@@ -22,10 +22,8 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
     private String commandOutput  = null;
     // Holds just the assembled command text (without shell tool prefix)
     private String lastCommandText = null;
-    // Holds the Windows execution tool prefix (e.g., "cmd.exe /c")
-    private String lastWindowsToolPrefix = null;
-    // Holds the other OS execution tool prefix (e.g., "bash -c")
-    private String lastOtherToolPrefix = null;
+    // Holds the execution tool prefix (e.g., "cmd.exe /c" or "bash -c")
+    private String lastToolPrefix = null;
     // Reference to the currently running process, used for cleanup
     private Process process = null;
 
@@ -66,19 +64,11 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
         String tool;
         String toolFlag;
         String workingDirectory;
-        String windowsTool;
-        String windowsToolFlag;
-        String otherTool;
-        String otherToolFlag;
 
         if (clConfig != null) {
-            tool = clConfig.getEffectiveTool();
-            toolFlag = clConfig.getEffectiveToolFlag();
-            workingDirectory = clConfig.getEffectiveWorkingDirectory();
-            windowsTool = clConfig.getWindowsTool();
-            windowsToolFlag = clConfig.getWindowsToolFlag();
-            otherTool = clConfig.getOtherTool();
-            otherToolFlag = clConfig.getOtherToolFlag();
+            tool = clConfig.getTool();
+            toolFlag = clConfig.getToolFlags();
+            workingDirectory = clConfig.getWorkingDirectory();
         } else {
             // Default behavior: detect OS and use default shell
             String os = System.getProperty("os.name").toLowerCase();
@@ -90,16 +80,11 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
                 toolFlag = "-c";
             }
             workingDirectory = null;
-            windowsTool = "cmd.exe";
-            windowsToolFlag = "/c";
-            otherTool = "bash";
-            otherToolFlag = "-c";
         }
 
-        // Store the command text and both OS tool prefixes separately for verification
+        // Store the command text and tool prefix for verification
         lastCommandText = command;
-        lastWindowsToolPrefix = windowsTool + " " + windowsToolFlag;
-        lastOtherToolPrefix = otherTool + " " + otherToolFlag;
+        lastToolPrefix = tool + " " + toolFlag;
 
         ProcessBuilder builder = new ProcessBuilder(tool, toolFlag, command);
         if (workingDirectory != null && !workingDirectory.isEmpty()) {
@@ -164,17 +149,11 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
     }
 
     /**
-     * Returns the execution tool prefix for the specified OS type.
-     * For "windows": e.g., "cmd.exe /c"
-     * For "non-windows": e.g., "bash -c"
-     * @param osType "windows" or "non-windows"
+     * Returns the execution tool prefix.
+     * For example: "cmd.exe /c" or "bash -c"
      * @return The tool prefix string, or null if no command has been executed.
      */
-    public String getLastToolPrefix(String osType) {
-        if ("windows".equals(osType)) {
-            return lastWindowsToolPrefix;
-        } else {
-            return lastOtherToolPrefix;
-        }
+    public String getLastToolPrefix() {
+        return lastToolPrefix;
     }
 }

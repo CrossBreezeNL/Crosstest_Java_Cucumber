@@ -38,46 +38,10 @@ Feature: ProcessExecutor - Command line execution
     echo "Parameter with spaces"
     """
 
-  Scenario: Run a command with environment variable
-    When I execute the following command on windows os:
-    """
-    echo %USERNAME%
-    """
-
-  Scenario: Run a command with command substitution (Unix-like)
-    When I execute the following command on non-windows os:
-    """
-    echo The date is: $(date)
-    """
-
   Scenario: Run a command with chained commands using &&
     When I execute the following command
     """
     echo First && echo Second
-    """
-
-  Scenario: Run a command with a pipe on windows
-    When I execute the following command on windows os:
-    """
-    echo Hello World | findstr "World"
-    """
-
-  Scenario: Run a command with a pipe on other
-    When I execute the following command on non-windows os:
-    """
-    echo Hello World | grep "World"
-    """
-
-  Scenario: Run a command with a pipe on windows - NL
-    Wanneer ik het volgende commando uitvoer op windows os:
-    """
-    echo Hello World | findstr "World"
-    """
-
-  Scenario: Run a command with a pipe on other - NL
-    Wanneer ik het volgende commando uitvoer op niet-windows os:
-    """
-    echo Hello World | grep "World"
     """
 
   # ==========================================================================
@@ -88,18 +52,6 @@ Feature: ProcessExecutor - Command line execution
     When I execute the following powershell command:
     """
     echo PowerShell test
-    """
-
-  Scenario: Run a command using powershell config on windows
-    When I execute the following powershell command on windows os:
-    """
-    Write-Output 'PowerShell on Windows'
-    """
-
-  Scenario: Run a command using powershell config on other
-    When I execute the following powershell command on non-windows os:
-    """
-    echo 'PowerShell on other'
     """
 
   Scenario: Run a command using powershell config - NL

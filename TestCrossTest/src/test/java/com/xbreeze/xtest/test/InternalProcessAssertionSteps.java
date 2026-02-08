@@ -33,21 +33,20 @@ public class InternalProcessAssertionSteps {
         Then_EN_AssembledCommandlineShouldBe(expectedCommand);
     }
 
-    @Then("^the execution tool prefix on (windows|non-windows) os should be:$")
-    public void Then_EN_ExecutionToolPrefixShouldBe(String osType, String expectedPrefix) throws Throwable {
-        String actual = _Process_helper.getLastExecutionToolPrefix(osType);
+    @Then("^the execution tool prefix should be:$")
+    public void Then_EN_ExecutionToolPrefixShouldBe(String expectedPrefix) throws Throwable {
+        String actual = _Process_helper.getLastExecutionToolPrefix();
         String expected = expectedPrefix.trim();
         if (!expected.equals(actual)) {
             throw new AssertionError(String.format(
-                "Execution tool prefix mismatch for %s.%nExpected: %s%nActual:   %s", osType, expected, actual
+                "Execution tool prefix mismatch.%nExpected: %s%nActual:   %s", expected, actual
             ));
         }
     }
 
-    @Dan("^moet de gebruikte executie tool vooraf aan het commando op (windows|niet-windows) os als volgt zijn:$")
-    public void Then_NL_ExecutionToolPrefixShouldBe(String osType, String expectedPrefix) throws Throwable {
-        String nlToEn = "niet-windows".equals(osType) ? "non-windows" : osType;
-        Then_EN_ExecutionToolPrefixShouldBe(nlToEn, expectedPrefix);
+    @Dan("^moet de gebruikte executie tool vooraf aan het commando als volgt zijn:$")
+    public void Then_NL_ExecutionToolPrefixShouldBe(String expectedPrefix) throws Throwable {
+        Then_EN_ExecutionToolPrefixShouldBe(expectedPrefix);
     }
 
 }

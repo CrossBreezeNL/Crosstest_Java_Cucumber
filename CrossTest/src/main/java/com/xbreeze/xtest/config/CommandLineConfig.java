@@ -30,13 +30,12 @@ import javax.xml.bind.annotation.XmlAttribute;
 @XmlAccessorType(XmlAccessType.NONE)
 public class CommandLineConfig {
 
+	private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+
 	private String _name;
-	private String _windowsTool = "cmd.exe";
-	private String _windowsToolFlag = "/c";
-	private String _otherTool = "bash";
-	private String _otherToolFlag = "-c";
-	private String _windowsWorkingDirectory;
-	private String _otherWorkingDirectory;
+	private String _tool = IS_WINDOWS ? "cmd.exe" : "bash";
+	private String _toolFlags = IS_WINDOWS ? "/c" : "-c";
+	private String _workingDirectory;
 
 	public CommandLineConfig() {
 		super();
@@ -51,84 +50,30 @@ public class CommandLineConfig {
 		this._name = name;
 	}
 
-	@XmlAttribute(name="windowsTool")
-	public String getWindowsTool() {
-		return _windowsTool;
+	@XmlAttribute(name="tool")
+	public String getTool() {
+		return _tool;
 	}
 
-	public void setWindowsTool(String windowsTool) {
-		this._windowsTool = windowsTool;
+	public void setTool(String tool) {
+		this._tool = tool;
 	}
 
-	@XmlAttribute(name="windowsToolFlag")
-	public String getWindowsToolFlag() {
-		return _windowsToolFlag;
+	@XmlAttribute(name="toolFlags")
+	public String getToolFlags() {
+		return _toolFlags;
 	}
 
-	public void setWindowsToolFlag(String windowsToolFlag) {
-		this._windowsToolFlag = windowsToolFlag;
+	public void setToolFlags(String toolFlags) {
+		this._toolFlags = toolFlags;
 	}
 
-	@XmlAttribute(name="otherTool")
-	public String getOtherTool() {
-		return _otherTool;
+	@XmlAttribute(name="workingDirectory")
+	public String getWorkingDirectory() {
+		return _workingDirectory;
 	}
 
-	public void setOtherTool(String otherTool) {
-		this._otherTool = otherTool;
-	}
-
-	@XmlAttribute(name="otherToolFlag")
-	public String getOtherToolFlag() {
-		return _otherToolFlag;
-	}
-
-	public void setOtherToolFlag(String otherToolFlag) {
-		this._otherToolFlag = otherToolFlag;
-	}
-
-	@XmlAttribute(name="windowsWorkingDirectory")
-	public String getWindowsWorkingDirectory() {
-		return _windowsWorkingDirectory;
-	}
-
-	public void setWindowsWorkingDirectory(String windowsWorkingDirectory) {
-		this._windowsWorkingDirectory = windowsWorkingDirectory;
-	}
-
-	@XmlAttribute(name="otherWorkingDirectory")
-	public String getOtherWorkingDirectory() {
-		return _otherWorkingDirectory;
-	}
-
-	public void setOtherWorkingDirectory(String otherWorkingDirectory) {
-		this._otherWorkingDirectory = otherWorkingDirectory;
-	}
-
-	public String getEffectiveTool() {
-		String os = System.getProperty("os.name").toLowerCase();
-		if (os.contains("win")) {
-			return _windowsTool;
-		} else {
-			return _otherTool;
-		}
-	}
-
-	public String getEffectiveToolFlag() {
-		String os = System.getProperty("os.name").toLowerCase();
-		if (os.contains("win")) {
-			return _windowsToolFlag;
-		} else {
-			return _otherToolFlag;
-		}
-	}
-
-	public String getEffectiveWorkingDirectory() {
-		String os = System.getProperty("os.name").toLowerCase();
-		if (os.contains("win")) {
-			return _windowsWorkingDirectory;
-		} else {
-			return _otherWorkingDirectory;
-		}
+	public void setWorkingDirectory(String workingDirectory) {
+		this._workingDirectory = workingDirectory;
 	}
 }

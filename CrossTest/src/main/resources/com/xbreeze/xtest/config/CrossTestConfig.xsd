@@ -231,11 +231,8 @@
   <xs:complexType name="commandLineConfig">
     <xs:sequence/>
     <xs:attribute name="name" type="xs:string" use="required"/>
-    <xs:attribute name="windowsTool" type="xs:string"/>
-    <xs:attribute name="windowsToolFlag" type="xs:string"/>
-    <xs:attribute name="otherTool" type="xs:string"/>
-    <xs:attribute name="otherToolFlag" type="xs:string"/>
-    <xs:attribute name="windowsWorkingDirectory" type="xs:string"/>
-    <xs:attribute name="otherWorkingDirectory" type="xs:string"/>
+    <xs:attribute name="tool" type="xs:string"/>
+    <xs:attribute name="toolFlags" type="xs:string"/>
+    <xs:attribute name="workingDirectory" type="xs:string"/>
   </xs:complexType>
 </xs:schema>

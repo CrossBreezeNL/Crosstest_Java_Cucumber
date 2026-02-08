@@ -60,48 +60,6 @@ echo Hello World
 """
 ```
 
-## Execute command on specific OS
-Execute a command using commandline, but only on the specified operating system. When the OS does not match, the step is silently skipped and the scenario continues without error. This is useful for platform-specific commands (e.g., `findstr` on Windows, `grep` on non-Windows).
-
-
-### Sentences
-| Type          | Language         | Sentence      |
-|:---           |:---              |:---           |
-| When | en | `^I execute the following command on (windows\|non-windows) os:$` |
-| When | nl | `^ik het volgende commando uitvoer op (windows\|niet-windows) os:$` |
-
-
-### Arguments
-The details of every argument of the step are listed below.
-
-| Parameter    | Datatype          | Description          |
-|:---          |:---               |:---                  |
-| command text | String | Command to be executed. It can be written as a multiline and multi-statement command, and will be executed at once. |
-| os type | String | `windows` or `non-windows`. When specified, the command only runs on the matching OS; otherwise it is silently skipped. |
-
-### Examples
-
-```gherkin
-When I execute the following command on windows os:
-"""
-echo Hello World | findstr "World"
-"""
-```
-
-```gherkin
-When I execute the following command on non-windows os:
-"""
-echo Hello World | grep "World"
-"""
-```
-
-```gherkin
-Wanneer ik het volgende commando uitvoer op windows os:
-"""
-echo Hello World | findstr "World"
-"""
-```
-
 ## Execute command on specific commandline
 Execute a command using a specific [CommandLineConfig](#commandlineconfig) instead of the default shell.
 
@@ -134,42 +92,6 @@ Write-Output 'Hello from PowerShell'
 Wanneer ik het volgende powershell commando uitvoer:
 """
 Write-Output 'Hello from PowerShell'
-"""
-```
-
-## Execute command on specific commandline and OS
-Execute a command using a specific [CommandLineConfig](#commandlineconfig), but only on the specified operating system. Combines the behavior of [Execute command on specific OS](#execute-command-on-specific-os) and [Execute command on specific commandline](#execute-command-on-specific-commandline).
-
-
-### Sentences
-| Type          | Language         | Sentence      |
-|:---           |:---              |:---           |
-| When | en | `^I execute the following ([a-zA-Z0-9_@$#]+) command on (windows\|non-windows) os:$` |
-| When | nl | `^ik het volgende ([a-zA-Z0-9_@$#]+) commando uitvoer op (windows\|niet-windows) os:$` |
-
-
-### Arguments
-The details of every argument of the step are listed below.
-
-| Parameter    | Datatype          | Description          |
-|:---          |:---               |:---                  |
-| command text | String | Command to be executed. It can be written as a multiline and multi-statement command, and will be executed at once. |
-| commandline config | String | Name of a [CommandLineConfig](#commandlineconfig) to use instead of the default shell. |
-| os type | String | `windows` or `non-windows`. When specified, the command only runs on the matching OS; otherwise it is silently skipped. |
-
-### Examples
-
-```gherkin
-When I execute the following powershell command on windows os:
-"""
-Write-Output 'PowerShell on Windows'
-"""
-```
-
-```gherkin
-Wanneer ik het volgende powershell commando uitvoer op niet-windows os:
-"""
-echo 'PowerShell on other'
 """
 ```
 
@@ -480,7 +402,7 @@ Wanneer ik het dbt proces uitvoer op powershell met de volgende argumenten:
 ```
 
 ## CommandLineConfig
-The `CommandLineConfig` element allows you to configure the shell, tool flags, and working directory used by commandline execution steps. By default, `cmd.exe /c` is used on Windows and `bash -c` on other platforms. A CommandLineConfig lets you override these defaults.
+The `CommandLineConfig` element allows you to configure the shell, tool flags, and working directory used by commandline execution steps. By default, `cmd.exe /c` is used on Windows and `bash -c` on other platforms (detected at runtime). A CommandLineConfig lets you override these defaults.
 
 ### XML configuration
 
@@ -490,10 +412,9 @@ CommandLineConfigs are defined inside a `CommandLineConfigs` wrapper element in 
 <XTestConfig>
   <CommandLineConfigs>
     <CommandLineConfig name="powershell"
-      windowsTool="powershell.exe" windowsToolFlag="-Command"
-      otherTool="pwsh" otherToolFlag="-Command"/>
+      tool="powershell.exe" toolFlags="-Command"/>
     <CommandLineConfig name="custom_workdir"
-      windowsWorkingDirectory="C:\workdir" otherWorkingDirectory="/opt/workdir"/>
+      workingDirectory="C:\workdir"/>
   </CommandLineConfigs>
   ...
 </XTestConfig>
@@ -504,12 +425,9 @@ CommandLineConfigs are defined inside a `CommandLineConfigs` wrapper element in 
 | Attribute | Required | Default | Description |
 |:--- |:--- |:--- |:--- |
 | `name` | Yes | | Unique name to reference this config. |
-| `windowsTool` | No | `cmd.exe` | The shell executable to use on Windows. |
-| `windowsToolFlag` | No | `/c` | The flag passed to the Windows shell to execute a command string. |
-| `otherTool` | No | `bash` | The shell executable to use on non-Windows platforms. |
-| `otherToolFlag` | No | `-c` | The flag passed to the non-Windows shell to execute a command string. |
-| `windowsWorkingDirectory` | No | _(inherit)_ | Working directory for command execution on Windows. |
-| `otherWorkingDirectory` | No | _(inherit)_ | Working directory for command execution on non-Windows platforms. |
+| `tool` | No | `cmd.exe` (Windows) / `bash` (other) | The shell executable to use. |
+| `toolFlags` | No | `/c` (Windows) / `-c` (other) | The flag(s) passed to the shell to execute a command string. |
+| `workingDirectory` | No | _(inherit)_ | Working directory for command execution. |
 
 ### Binding a CommandLineConfig to a ProcessConfig
 

@@ -3,11 +3,10 @@
 
 	<CommandLineConfigs>
 		<CommandLineConfig name="powershell"
-			windowsTool="powershell.exe" windowsToolFlag="-Command"
-			otherTool="pwsh" otherToolFlag="-Command"/>
+			tool="powershell.exe" toolFlags="-Command"/>
 		<CommandLineConfig name="default_shell"/>
 		<CommandLineConfig name="custom_workdir"
-			windowsWorkingDirectory="C:\temp" otherWorkingDirectory="/tmp"/>
+			workingDirectory="C:\temp"/>
 	</CommandLineConfigs>
 
 	<CompositeObjects>

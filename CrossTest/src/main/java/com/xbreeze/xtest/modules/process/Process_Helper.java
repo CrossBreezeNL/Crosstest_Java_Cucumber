@@ -62,32 +62,6 @@ public class Process_Helper {
 	}
 
 	/**
-	 * Executes a raw command string on the commandline, but only if the current OS matches the given osType.
-	 * If the OS does not match, the command is silently skipped.
-	 * @param command_text The command to execute.
-	 * @param osType "windows" or "non-windows".
-	 */
-	public void ExecuteCommandForOs(String command_text, String osType) throws Throwable{
-		if (isCurrentOs(osType)) {
-			ExecuteCommand(command_text);
-		}
-	}
-
-	/**
-	 * Executes a raw command string on the commandline using a specific CommandLineConfig,
-	 * but only if the current OS matches the given osType.
-	 * If the OS does not match, the command is silently skipped.
-	 * @param command_text The command to execute.
-	 * @param commandLineConfigName The name of the CommandLineConfig to use.
-	 * @param osType "windows" or "non-windows".
-	 */
-	public void ExecuteCommandForOs(String command_text, String commandLineConfigName, String osType) throws Throwable{
-		if (isCurrentOs(osType)) {
-			ExecuteCommand(command_text, commandLineConfigName);
-		}
-	}
-
-	/**
 	 * Executes a raw command string on the commandline using a specific CommandLineConfig.
 	 * @param command_text The command to execute.
 	 * @param commandLineConfigName The name of the CommandLineConfig to use.
@@ -324,15 +298,13 @@ public class Process_Helper {
 	}
 
 	/**
-	 * Returns the execution tool prefix for the specified OS type.
-	 * For "windows": e.g., "cmd.exe /c"
-	 * For "non-windows": e.g., "bash -c"
+	 * Returns the execution tool prefix.
+	 * For example: "cmd.exe /c" or "bash -c"
 	 * This is intended for test assertions to verify the execution tool configuration.
-	 * @param osType "windows" or "non-windows"
 	 * @return The tool prefix string, or null if no command has been executed.
 	 */
-	public String getLastExecutionToolPrefix(String osType) {
-		return getCommandLineExecutor().getLastToolPrefix(osType);
+	public String getLastExecutionToolPrefix() {
+		return getCommandLineExecutor().getLastToolPrefix();
 	}
 
 	/**
@@ -421,17 +393,6 @@ public class Process_Helper {
 		}
 	}
 		
-	/**
-	 * Checks whether the current OS matches the given osType.
-	 * @param osType "windows" or "non-windows"
-	 * @return true if the current OS matches the given type
-	 */
-	private boolean isCurrentOs(String osType) {
-		String os = System.getProperty("os.name").toLowerCase();
-		boolean isWindows = os.contains("win");
-		return (isWindows && "windows".equals(osType)) || (!isWindows && "non-windows".equals(osType));
-	}
-
 	/**
 	 * Returns a cached CommandLineProcessExecutor instance, creating one if needed.
 	 * This executor is used by ExecuteCommand and ExecuteTemplatedCommandProcesWithParameters to run
