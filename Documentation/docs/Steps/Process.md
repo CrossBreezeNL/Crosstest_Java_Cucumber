@@ -103,8 +103,8 @@ This step does not require a ProcessServerConfig binding. The CommandLineProcess
 ### Sentences
 | Type          | Language         | Sentence      |
 |:---           |:---              |:---           |
-| When | en | ^I execute the ([a-zA-Z0-9_@$#]+) process using commandline with the following arguments:$ |
-| When | nl | ^ik het ([a-zA-Z0-9_@$#]+) proces uitvoer via commandline met de volgende argumenten:$ |
+| When | en | ^I execute the ([a-zA-Z0-9_@$#]+) commandline process using the following arguments:$ |
+| When | nl | ^ik het ([a-zA-Z0-9_@$#]+) commandline proces uitvoer met de volgende argumenten:$ |
 
 ### Arguments
 The details of every argument of the step are listed below.
@@ -259,7 +259,7 @@ Config-level parameters with dot-notation names (e.g., `vars.db=default_database
 
 #### Basic arguments
 ```gherkin
-When I execute the dbt process using commandline with the following arguments:
+When I execute the dbt commandline process using the following arguments:
   | args   | value    |
   | select | my_model |
 ```
@@ -267,7 +267,7 @@ Result: `dbt run --select my_model --target dev`
 
 #### Multiple arguments
 ```gherkin
-When I execute the dbt process using commandline with the following arguments:
+When I execute the dbt commandline process using the following arguments:
   | args    | value          |
   | select  | my_model       |
   | exclude | my_other_model |
@@ -276,7 +276,7 @@ Result: `dbt run --select my_model --exclude my_other_model --target dev`
 
 #### Overriding ending_args
 ```gherkin
-When I execute the dbt process using commandline with the following arguments:
+When I execute the dbt commandline process using the following arguments:
   | args        | value         |
   | select      | my_model      |
   | ending_args | --target prod |
@@ -285,7 +285,7 @@ Result: `dbt run --select my_model --target prod`
 
 #### With starting_args flag
 ```gherkin
-When I execute the dbt process using commandline with the following arguments:
+When I execute the dbt commandline process using the following arguments:
   | args          | value          |
   | starting_args | --full-refresh |
   | select        | my_model       |
@@ -294,7 +294,7 @@ Result: `dbt run --full-refresh --select my_model --target dev`
 
 #### Grouped arguments (dbt vars)
 ```gherkin
-When I execute the dbt process using commandline with the following arguments:
+When I execute the dbt commandline process using the following arguments:
   | args      | value                |
   | vars.db   | database_op_teradata |
   | vars.ldts | 2025-07-26 00:00:00  |
@@ -304,7 +304,7 @@ Result: `dbt run --vars "{'db': 'database_op_teradata', 'ldts': '2025-07-26 00:0
 
 #### Multiple groups (Helm set + set-string)
 ```gherkin
-When I execute the helm process using commandline with the following arguments:
+When I execute the helm commandline process using the following arguments:
   | args              | value      |
   | set.replicas      | 3          |
   | set.port          | 8080       |
@@ -317,7 +317,7 @@ Result: `helm upgrade --install my-release my-chart --set replicas=3,port=8080 -
 Using the `dbt_with_defaults` config (which has `vars.db=default_database` and `vars.ldts=2025-01-01 00:00:00`):
 
 ```gherkin
-When I execute the dbt_with_defaults process using commandline with the following arguments:
+When I execute the dbt_with_defaults commandline process using the following arguments:
   | args      | value           |
   | vars.db   | other_database  |
   | vars.user | myuser          |
@@ -331,7 +331,7 @@ The `vars.db` default is overridden, `vars.ldts` is kept from config, and `vars.
 Using the `mytool` config (which has `path=c:\data` and `format=csv` as defaults):
 
 ```gherkin
-When I execute the mytool process using commandline with the following arguments:
+When I execute the mytool commandline process using the following arguments:
   | args   | value      |
   | output | result.txt |
 ```
@@ -341,7 +341,7 @@ The `output` argument is from the feature table. The `path` and `format` default
 
 #### Overriding a config argument default
 ```gherkin
-When I execute the mytool process using commandline with the following arguments:
+When I execute the mytool commandline process using the following arguments:
   | args   | value      |
   | path   | d:\other   |
   | output | result.txt |
@@ -352,7 +352,7 @@ The `path` default is overridden by the feature table value. The `format` defaul
 
 #### Java-style arguments
 ```gherkin
-When I execute the java_app process using commandline with the following arguments:
+When I execute the java_app commandline process using the following arguments:
   | args | value      |
   | env  | production |
   | port | 8080       |
@@ -361,7 +361,7 @@ Result: `java -jar app.jar -Denv=production -Dport=8080`
 
 #### Dutch (NL) variant
 ```gherkin
-Wanneer ik het dbt proces uitvoer via commandline met de volgende argumenten:
+Wanneer ik het dbt commandline proces uitvoer met de volgende argumenten:
   | args   | value    |
   | select | my_model |
 ```
@@ -375,8 +375,8 @@ The commandline config specified in the step sentence overrides any `commandLine
 ### Sentences
 | Type          | Language         | Sentence      |
 |:---           |:---              |:---           |
-| When | en | ^I execute the ([a-zA-Z0-9_@$#]+) process on ([a-zA-Z0-9_@$#]+) with the following arguments:$ |
-| When | nl | ^ik het ([a-zA-Z0-9_@$#]+) proces uitvoer op ([a-zA-Z0-9_@$#]+) met de volgende argumenten:$ |
+| When | en | ^I execute the ([a-zA-Z0-9_@$#]+) commandline process with ([a-zA-Z0-9_@$#]+) using the following arguments:$ |
+| When | nl | ^ik het ([a-zA-Z0-9_@$#]+) commandline proces uitvoer via ([a-zA-Z0-9_@$#]+) met de volgende argumenten:$ |
 
 ### Arguments
 | Parameter    | Datatype          | Description          |
@@ -389,14 +389,14 @@ The commandline config specified in the step sentence overrides any `commandLine
 
 #### Execution-time override
 ```gherkin
-When I execute the dbt process on powershell with the following arguments:
+When I execute the dbt commandline process with powershell using the following arguments:
   | args   | value    |
   | select | my_model |
 ```
 
 #### Dutch (NL) variant
 ```gherkin
-Wanneer ik het dbt proces uitvoer op powershell met de volgende argumenten:
+Wanneer ik het dbt commandline proces uitvoer via powershell met de volgende argumenten:
   | args   | value    |
   | select | my_model |
 ```
@@ -446,10 +446,10 @@ When this ProcessConfig is used in an "execute commandline with arguments" step,
 
 ### Execution-time override
 
-The "on {commandline config}" step sentence allows overriding the CommandLineConfig at execution time, regardless of what is configured on the ProcessConfig:
+The "with {commandline config}" step sentence allows overriding the CommandLineConfig at execution time, regardless of what is configured on the ProcessConfig:
 
 ```gherkin
-When I execute the dbt process on powershell with the following arguments:
+When I execute the dbt commandline process with powershell using the following arguments:
   | args   | value    |
   | select | my_model |
 ```

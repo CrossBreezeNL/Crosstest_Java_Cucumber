@@ -9,7 +9,7 @@ Feature: Command assembly - custom formatting and argument defaults
   # ==========================================================================
 
   Scenario: java_style - single arg
-    When I execute the java_style process using commandline with the following arguments:
+    When I execute the java_style commandline process using the following arguments:
       | args | value      |
       | env  | production |
     Then the assembled commandline should be:
@@ -18,7 +18,7 @@ Feature: Command assembly - custom formatting and argument defaults
       """
 
   Scenario: java_style - multiple args
-    When I execute the java_style process using commandline with the following arguments:
+    When I execute the java_style commandline process using the following arguments:
       | args | value      |
       | env  | production |
       | port |       8080 |
@@ -28,7 +28,7 @@ Feature: Command assembly - custom formatting and argument defaults
       """
 
   Scenario: java_style - with starting_args override
-    When I execute the java_style process using commandline with the following arguments:
+    When I execute the java_style commandline process using the following arguments:
       | args          | value      |
       | starting_args | -server    |
       | env           | production |
@@ -44,7 +44,7 @@ Feature: Command assembly - custom formatting and argument defaults
   # ==========================================================================
 
   Scenario: quoted_args - single arg
-    When I execute the quoted_args process using commandline with the following arguments:
+    When I execute the quoted_args commandline process using the following arguments:
       | args | value |
       | name | Alice |
     Then the assembled commandline should be:
@@ -53,7 +53,7 @@ Feature: Command assembly - custom formatting and argument defaults
       """
 
   Scenario: quoted_args - multiple args
-    When I execute the quoted_args process using commandline with the following arguments:
+    When I execute the quoted_args commandline process using the following arguments:
       | args   | value       |
       | input  | data.csv    |
       | output | result.json |
@@ -69,7 +69,7 @@ Feature: Command assembly - custom formatting and argument defaults
   # ==========================================================================
 
   Scenario: dbt_with_default_regular_args - config defaults used (no regular args in table)
-    When I execute the dbt_with_default_regular_args process using commandline with the following arguments:
+    When I execute the dbt_with_default_regular_args commandline process using the following arguments:
       | args        | value            |
       | ending_args | --target staging |
     Then the assembled commandline should be:
@@ -78,7 +78,7 @@ Feature: Command assembly - custom formatting and argument defaults
       """
 
   Scenario: dbt_with_default_regular_args - feature arg overrides config default
-    When I execute the dbt_with_default_regular_args process using commandline with the following arguments:
+    When I execute the dbt_with_default_regular_args commandline process using the following arguments:
       | args   | value            |
       | select | overridden_model |
     Then the assembled commandline should be:
@@ -87,7 +87,7 @@ Feature: Command assembly - custom formatting and argument defaults
       """
 
   Scenario: tool_with_defaults - config defaults with feature addition
-    When I execute the tool_with_defaults process using commandline with the following arguments:
+    When I execute the tool_with_defaults commandline process using the following arguments:
       | args   | value      |
       | output | result.txt |
     Then the assembled commandline should be:
@@ -96,7 +96,7 @@ Feature: Command assembly - custom formatting and argument defaults
       """
 
   Scenario: tool_with_defaults - override one config default and add new
-    When I execute the tool_with_defaults process using commandline with the following arguments:
+    When I execute the tool_with_defaults commandline process using the following arguments:
       | args   | value      |
       | path   | d:\other   |
       | output | result.txt |
@@ -106,7 +106,7 @@ Feature: Command assembly - custom formatting and argument defaults
       """
 
   Scenario: tool_with_defaults - override all config defaults
-    When I execute the tool_with_defaults process using commandline with the following arguments:
+    When I execute the tool_with_defaults commandline process using the following arguments:
       | args   | value     |
       | path   | d:\output |
       | format | json      |
@@ -120,7 +120,7 @@ Feature: Command assembly - custom formatting and argument defaults
   # ==========================================================================
 
   Scenario: dbt_with_default_regular_and_vars - regular arg + group defaults, override both
-    When I execute the dbt_with_default_regular_and_vars process using commandline with the following arguments:
+    When I execute the dbt_with_default_regular_and_vars commandline process using the following arguments:
       | args    | value          |
       | select  | custom_model   |
       | vars.db | other_database |
@@ -130,7 +130,7 @@ Feature: Command assembly - custom formatting and argument defaults
       """
 
   Scenario: dbt_with_default_regular_and_vars - no overrides, all defaults used
-    When I execute the dbt_with_default_regular_and_vars process using commandline with the following arguments:
+    When I execute the dbt_with_default_regular_and_vars commandline process using the following arguments:
       | args        | value            |
       | ending_args | --target staging |
     Then the assembled commandline should be:

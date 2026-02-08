@@ -15,7 +15,7 @@ public class ExecuteTemplatedCommandOnCommandline_Steps
         _Process_helper = Process_helper;
     }
 
-    @When("^I execute the ([a-zA-Z0-9_@$#]+) process on ([a-zA-Z0-9_@$#]+) with the following arguments:$")
+    @When("^I execute the ([a-zA-Z0-9_@$#]+) commandline process with ([a-zA-Z0-9_@$#]+) using the following arguments:$")
     public void When_EN_ExecuteTemplatedCommandOnCommandline(
         String process_config,
         String commandline_config,
@@ -29,7 +29,7 @@ public class ExecuteTemplatedCommandOnCommandline_Steps
         );
     }
 
-    @Wanneer("^ik het ([a-zA-Z0-9_@$#]+) proces uitvoer op ([a-zA-Z0-9_@$#]+) met de volgende argumenten:$")
+    @Wanneer("^ik het ([a-zA-Z0-9_@$#]+) commandline proces uitvoer via ([a-zA-Z0-9_@$#]+) met de volgende argumenten:$")
     public void When_NL_ExecuteTemplatedCommandOnCommandline(
         String process_config,
         String commandline_config,

@@ -15,7 +15,7 @@ public class ExecuteTemplatedCommandProcesWithParameters_Steps
         _Process_helper = Process_helper;
     }
 
-    @When("^I execute the ([a-zA-Z0-9_@$#]+) process using commandline with the following arguments:$")
+    @When("^I execute the ([a-zA-Z0-9_@$#]+) commandline process using the following arguments:$")
     public void When_EN_ExecuteTemplatedCommand_D63315D3_F17C_4C05_BD7A_49A30F26A734(
         String process_config,
         DataTable parameter_table
@@ -27,7 +27,7 @@ public class ExecuteTemplatedCommandProcesWithParameters_Steps
         );
     }
 
-    @Wanneer("^ik het ([a-zA-Z0-9_@$#]+) proces uitvoer via commandline met de volgende argumenten:$")
+    @Wanneer("^ik het ([a-zA-Z0-9_@$#]+) commandline proces uitvoer met de volgende argumenten:$")
     public void When_NL_ExecuteTemplatedCommand_86E23373_26FB_411C_90A0_1A397CC88524(
         String process_config,
         DataTable parameter_table

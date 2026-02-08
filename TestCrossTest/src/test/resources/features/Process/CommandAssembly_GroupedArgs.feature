@@ -8,7 +8,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
   # ==========================================================================
 
   Scenario: dbt - vars only (grouped args)
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args      | value                |
       | vars.db   | database_op_teradata |
       | vars.ldts |  2025-07-26 00:00:00 |
@@ -18,7 +18,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
       """
 
   Scenario: dbt - vars with regular args (mixed ordering)
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args      | value                |
       | vars.db   | database_op_teradata |
       | vars.ldts |  2025-07-26 00:00:00 |
@@ -29,7 +29,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
       """
 
   Scenario: dbt - vars with starting_args flag
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args          | value                |
       | starting_args | --full-refresh       |
       | vars.db       | database_op_teradata |
@@ -41,7 +41,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
       """
 
   Scenario: dbt - vars with command override
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args      | value                |
       | command   | echo dbt build       |
       | vars.db   | database_op_teradata |
@@ -53,7 +53,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
       """
 
   Scenario: helm - multiple groups (set + set-string)
-    When I execute the helm process using commandline with the following arguments:
+    When I execute the helm commandline process using the following arguments:
       | args              | value      |
       | set.replicas      |          3 |
       | set.port          |       8080 |
@@ -71,7 +71,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
   # ==========================================================================
 
   Scenario: dbt_with_default_vars - config defaults only (no vars in feature, only regular args)
-    When I execute the dbt_with_default_vars process using commandline with the following arguments:
+    When I execute the dbt_with_default_vars commandline process using the following arguments:
       | args   | value           |
       | select | view_met_logica |
     Then the assembled commandline should be:
@@ -80,7 +80,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
       """
 
   Scenario: dbt_with_default_vars - config defaults with feature addition
-    When I execute the dbt_with_default_vars process using commandline with the following arguments:
+    When I execute the dbt_with_default_vars commandline process using the following arguments:
       | args      | value           |
       | vars.user | myuser          |
       | select    | view_met_logica |
@@ -90,7 +90,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
       """
 
   Scenario: dbt_with_default_vars - config defaults with feature override
-    When I execute the dbt_with_default_vars process using commandline with the following arguments:
+    When I execute the dbt_with_default_vars commandline process using the following arguments:
       | args    | value           |
       | vars.db | other_database  |
       | select  | view_met_logica |
@@ -100,7 +100,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
       """
 
   Scenario: dbt_with_default_vars - config defaults with override and addition
-    When I execute the dbt_with_default_vars process using commandline with the following arguments:
+    When I execute the dbt_with_default_vars commandline process using the following arguments:
       | args      | value           |
       | vars.db   | other_database  |
       | vars.user | myuser          |
@@ -115,7 +115,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
   # ==========================================================================
 
   Scenario: dbt - NL step with vars (grouped args)
-    Wanneer ik het dbt proces uitvoer via commandline met de volgende argumenten:
+    Wanneer ik het dbt commandline proces uitvoer met de volgende argumenten:
       | args      | value                |
       | vars.db   | database_op_teradata |
       | vars.ldts | 2025-07-26 00:00:00  |
@@ -125,7 +125,7 @@ Feature: Command assembly - dot-notation grouped arguments and group defaults
       """
 
   Scenario: dbt_with_default_vars - NL step with config defaults
-    Wanneer ik het dbt_with_default_vars proces uitvoer via commandline met de volgende argumenten:
+    Wanneer ik het dbt_with_default_vars commandline proces uitvoer met de volgende argumenten:
       | args      | value           |
       | vars.user | myuser          |
       | select    | view_met_logica |

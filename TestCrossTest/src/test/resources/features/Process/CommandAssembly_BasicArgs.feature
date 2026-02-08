@@ -8,7 +8,7 @@ Feature: Command assembly - basic arguments and special argument overrides
   # ==========================================================================
 
   Scenario: dbt - single feature arg
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args   | value    |
       | select | my_model |
     Then the assembled commandline should be:
@@ -17,7 +17,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt - multiple feature args
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args    | value          |
       | select  | my_model       |
       | exclude | my_other_model |
@@ -27,7 +27,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt - with starting_args flag
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args          | value          |
       | starting_args | --full-refresh |
       | select        | my_model       |
@@ -37,7 +37,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt - override ending_args
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args        | value         |
       | select      | my_model      |
       | ending_args | --target prod |
@@ -47,7 +47,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt - override command
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args    | value          |
       | command | echo dbt build |
       | select  | my_model       |
@@ -57,7 +57,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt - override command, starting_args, and ending_args
-    When I execute the dbt process using commandline with the following arguments:
+    When I execute the dbt commandline process using the following arguments:
       | args          | value            |
       | command       | echo dbt build   |
       | starting_args | --full-refresh   |
@@ -73,7 +73,7 @@ Feature: Command assembly - basic arguments and special argument overrides
   # ==========================================================================
 
   Scenario: dbt_seed - with feature args and no ending_args in config
-    When I execute the dbt_seed process using commandline with the following arguments:
+    When I execute the dbt_seed commandline process using the following arguments:
       | args         | value |
       | full_refresh |       |
     Then the assembled commandline should be:
@@ -82,7 +82,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt_seed - with select arg
-    When I execute the dbt_seed process using commandline with the following arguments:
+    When I execute the dbt_seed commandline process using the following arguments:
       | args   | value         |
       | select | my_seed_model |
     Then the assembled commandline should be:
@@ -91,7 +91,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt_test - with select arg
-    When I execute the dbt_test process using commandline with the following arguments:
+    When I execute the dbt_test commandline process using the following arguments:
       | args   | value      |
       | select | test_model |
     Then the assembled commandline should be:
@@ -100,7 +100,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt_test - override ending_args to remove store-failures
-    When I execute the dbt_test process using commandline with the following arguments:
+    When I execute the dbt_test commandline process using the following arguments:
       | args        | value        |
       | select      | test_model   |
       | ending_args | --target dev |
@@ -110,7 +110,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt_with_default_args - no feature args uses default feature_args from config
-    When I execute the dbt_with_default_args process using commandline with the following arguments:
+    When I execute the dbt_with_default_args commandline process using the following arguments:
       | args        | value            |
       | ending_args | --target staging |
     Then the assembled commandline should be:
@@ -119,7 +119,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt_with_default_args - feature args override default feature_args
-    When I execute the dbt_with_default_args process using commandline with the following arguments:
+    When I execute the dbt_with_default_args commandline process using the following arguments:
       | args   | value            |
       | select | overridden_model |
     Then the assembled commandline should be:
@@ -128,7 +128,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt_command_only - command only config with feature args
-    When I execute the dbt_command_only process using commandline with the following arguments:
+    When I execute the dbt_command_only commandline process using the following arguments:
       | args   | value      |
       | select | some_model |
     Then the assembled commandline should be:
@@ -137,7 +137,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt_command_only - command only config with all args from table
-    When I execute the dbt_command_only process using commandline with the following arguments:
+    When I execute the dbt_command_only commandline process using the following arguments:
       | args        | value        |
       | command     | echo dbt run |
       | select      | some_model   |
@@ -148,7 +148,7 @@ Feature: Command assembly - basic arguments and special argument overrides
       """
 
   Scenario: dbt_no_params - config without parameters, all from table
-    When I execute the dbt_no_params process using commandline with the following arguments:
+    When I execute the dbt_no_params commandline process using the following arguments:
       | args        | value        |
       | command     | echo dbt run |
       | select      | some_model   |
@@ -163,7 +163,7 @@ Feature: Command assembly - basic arguments and special argument overrides
   # ==========================================================================
 
   Scenario: dbt - NL step with feature args
-    Wanneer ik het dbt proces uitvoer via commandline met de volgende argumenten:
+    Wanneer ik het dbt commandline proces uitvoer met de volgende argumenten:
       | args   | value    |
       | select | my_model |
     Dan moet het samengestelde commando als volgt zijn:
