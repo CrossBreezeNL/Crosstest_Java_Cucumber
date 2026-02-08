@@ -146,6 +146,8 @@ public class Process_Helper {
 				startingArgs = argValue;
 			} else if ("ending_args".equals(argName)) {
 				endingArgs = argValue;
+			} else if ("feature_args".equals(argName)) {
+				featureArgs = argValue;
 			} else if (argName.contains(".")) {
 				// Dot-notation: split on first dot into group prefix and key.
 				// For example, "vars.db" becomes prefix="vars", key="db".
@@ -219,8 +221,9 @@ public class Process_Helper {
 			}
 		}
 
-		// If any individual args found (from config or table), they replace the feature_args string default
-		if (!featureArgParts.isEmpty()) {
+		// feature_args takes precedence: if non-empty, use it as-is and skip individual args.
+		// Only construct from individual args when feature_args is empty.
+		if (featureArgs.isEmpty() && !featureArgParts.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < featureArgParts.size(); i++) {
 				if (i > 0) {

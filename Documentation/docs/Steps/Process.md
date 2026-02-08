@@ -138,6 +138,7 @@ Each row in the arguments table has two columns: the first column is the argumen
 | `command` | Overrides the command segment from config. |
 | `starting_args` | Overrides the starting_args segment from config. |
 | `ending_args` | Overrides the ending_args segment from config. |
+| `feature_args` | Overrides the feature_args segment from config. When non-empty, individual arguments are skipped. Set to empty to clear a config-level `feature_args` and use individual arguments instead. |
 | Name with a dot (e.g., `vars.db`) | Grouped argument. See [Grouped arguments](#grouped-arguments). |
 | Any other name (e.g., `select`) | Regular feature argument. Overrides a config default with the same name, or adds a new argument. Formatted as `{arg_key_prefix}{name}{arg_key_value_separator}{value}`. |
 
@@ -152,22 +153,24 @@ ProcessConfig parameters that are not reserved names and do not contain a dot ar
 
 This allows you to define common arguments once in the config and override only specific values per scenario. See [Configuration examples](#configuration-examples) for a practical example.
 
-**Important:** Do not combine `feature_args` with argument defaults in the same ProcessConfig. When argument defaults are present, they take precedence and the `feature_args` fallback string is ignored. For example:
+**Important:** `feature_args` takes precedence over individual arguments. When `feature_args` is non-empty (from the ProcessConfig or overridden from the feature table), it is used as-is and individual arguments (from config defaults and the feature table) are ignored. Individual arguments are only constructed when `feature_args` is empty.
 
-```xml
-<!-- Do NOT do this: feature_args will never be used because select is an argument default -->
-<ProcessConfig name="broken_example">
-    <Parameters>
-        <Parameter name="command" value="dbt run"/>
-        <Parameter name="feature_args" value="--select my_default_model"/>
-        <Parameter name="select" value="other_model"/>
-    </Parameters>
-</ProcessConfig>
+To override a config-level `feature_args` from the feature table, use `feature_args` as a row name:
+
+```gherkin
+When I execute the dbt commandline process using the following arguments:
+  | args         | value                    |
+  | feature_args | --select overridden_model |
 ```
 
-The `select` argument default makes the feature args segment non-empty, so `feature_args` is ignored entirely. The result would be `dbt run --select other_model`, not `dbt run --select my_default_model --select other_model`.
+To clear `feature_args` and use individual arguments instead, set it to an empty value:
 
-Use either `feature_args` (a single pre-formatted string fallback) **or** argument defaults (individual named parameters), not both.
+```gherkin
+When I execute the dbt commandline process using the following arguments:
+  | args         | value            |
+  | feature_args |                  |
+  | select       | overridden_model |
+```
 
 ### ProcessConfig parameters
 The following reserved parameters can be set in the ProcessConfig to control the command assembly and argument formatting. Any parameter not listed here and not containing a dot is treated as a regular argument default (see [Argument defaults](#argument-defaults)).

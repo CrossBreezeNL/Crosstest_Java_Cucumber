@@ -118,13 +118,22 @@ Feature: Command assembly - basic arguments and special argument overrides
       echo dbt run --select my_default_model --target staging
       """
 
-  Scenario: dbt_with_default_args - feature args override default feature_args
+  Scenario: dbt_with_default_args - feature_args from table overrides config feature_args
+    When I execute the dbt_with_default_args commandline process using the following arguments:
+      | args         | value                    |
+      | feature_args | --select overridden_model |
+    Then the assembled commandline should be:
+      """
+      echo dbt run --select overridden_model --target dev
+      """
+
+  Scenario: dbt_with_default_args - feature_args takes precedence over individual args
     When I execute the dbt_with_default_args commandline process using the following arguments:
       | args   | value            |
       | select | overridden_model |
     Then the assembled commandline should be:
       """
-      echo dbt run --select overridden_model --target dev
+      echo dbt run --select my_default_model --target dev
       """
 
   Scenario: dbt_command_only - command only config with feature args
