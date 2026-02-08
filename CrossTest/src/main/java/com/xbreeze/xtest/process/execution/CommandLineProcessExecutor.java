@@ -147,6 +147,14 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
     }
 
     /**
+     * Returns the output of the last executed command.
+     * @return The command output, or null if no command has been executed.
+     */
+    public String getCommandOutput() {
+        return commandOutput;
+    }
+
+    /**
      * Returns the assembled command text without the shell tool prefix.
      * For example: "echo dbt run --select my_model --target dev"
      * @return The command text, or null if no command has been executed.

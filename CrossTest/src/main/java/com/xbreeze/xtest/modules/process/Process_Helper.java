@@ -44,12 +44,21 @@ public class Process_Helper {
 	}
 
 	/**
+	 * Returns the output of the last executed commandline command.
+	 * @return The command output, or null if no command has been executed.
+	 */
+	public String getLastCommandOutput() {
+		return getCommandLineExecutor().getCommandOutput();
+	}
+
+	/**
 	 * Executes a raw command string on the commandline.
 	 * Uses CommandLineProcessExecutor directly, so no ProcessServerConfig binding is required in the XML config.
 	 * @param command_text The command to execute.
 	 */
 	public void ExecuteCommand(String command_text) throws Throwable{
 		getCommandLineExecutor().runProcess(null, command_text);
+		logger.info(String.format("Command output:%n%s", getCommandLineExecutor().getCommandOutput()));
 	}
 
 	/**
@@ -86,6 +95,7 @@ public class Process_Helper {
 	public void ExecuteCommand(String command_text, String commandLineConfigName) throws Throwable{
 		CommandLineConfig clConfig = _config.getCommandLineConfig(commandLineConfigName);
 		getCommandLineExecutor().runProcess(null, command_text, clConfig);
+		logger.info(String.format("Command output:%n%s", getCommandLineExecutor().getCommandOutput()));
 	}
 
 	/**
@@ -276,6 +286,7 @@ public class Process_Helper {
 		// Use the CommandLineConfig from the ProcessConfig if available
 		CommandLineConfig clConfig = processConfig.getCommandLineConfig();
 		getCommandLineExecutor().runProcess(processConfig, commandText, clConfig);
+		logger.info(String.format("Command output:%n%s", getCommandLineExecutor().getCommandOutput()));
 	}
 
 	/**
