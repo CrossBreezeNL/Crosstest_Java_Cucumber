@@ -1,6 +1,8 @@
 package com.xbreeze.xtest.steps.process;
 import com.xbreeze.xtest.modules.process.Process_Helper;
 
+import io.cucumber.datatable.DataTable;
+
 import io.cucumber.java.en.When;
 import io.cucumber.java.nl.Wanneer;
 
@@ -8,7 +10,7 @@ public class ExecuteCommand_Steps
 {
 
     private Process_Helper _Process_helper;
-
+    
     public ExecuteCommand_Steps(Process_Helper Process_helper) {
         _Process_helper = Process_helper;
     }
@@ -33,28 +35,5 @@ public class ExecuteCommand_Steps
         );
     }
 
-    @When("^I execute the following ([a-zA-Z0-9_@$#]+) command:$")
-    public void When_EN_ExecuteCommandWithConfig(
-        String commandLineConfigName,
-        String command_text
-    ) throws Throwable
-    {
-        _Process_helper.ExecuteCommand(
-            command_text,
-            commandLineConfigName
-        );
-    }
-
-    @Wanneer("^ik het volgende ([a-zA-Z0-9_@$#]+) commando uitvoer:$")
-    public void When_NL_ExecuteCommandWithConfig(
-        String commandLineConfigName,
-        String command_text
-    ) throws Throwable
-    {
-        _Process_helper.ExecuteCommand(
-            command_text,
-            commandLineConfigName
-        );
-    }
 
 }

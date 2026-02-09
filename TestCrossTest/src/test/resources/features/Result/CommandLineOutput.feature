@@ -6,7 +6,7 @@ Feature: ProcessExecutor - Command line output assertions
     """
     echo Hello World
     """
-    Then the commandline output should contain:
+    Then the commandline output must contain:
     """
     Hello World
     """
@@ -16,7 +16,7 @@ Feature: ProcessExecutor - Command line output assertions
     """
     echo Hello World
     """
-    Then the commandline output should be:
+    Then the commandline output must be:
     """
     Hello World
     """
@@ -26,7 +26,7 @@ Feature: ProcessExecutor - Command line output assertions
     """
     echo First && echo Second
     """
-    Then the commandline output should contain:
+    Then the commandline output must contain:
     """
     First
     """
@@ -36,7 +36,7 @@ Feature: ProcessExecutor - Command line output assertions
     """
     echo First && echo Second
     """
-    Then the commandline output should be:
+    Then the commandline output must be:
     """
     First
     Second
@@ -47,7 +47,7 @@ Feature: ProcessExecutor - Command line output assertions
     """
     echo Line1 && echo Line2 && echo Line3
     """
-    Then the commandline output should contain:
+    Then the commandline output must contain:
     """
     Line1
     Line2

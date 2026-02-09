@@ -62,17 +62,6 @@ public class Process_Helper {
 	}
 
 	/**
-	 * Executes a raw command string on the commandline using a specific CommandLineConfig.
-	 * @param command_text The command to execute.
-	 * @param commandLineConfigName The name of the CommandLineConfig to use.
-	 */
-	public void ExecuteCommand(String command_text, String commandLineConfigName) throws Throwable{
-		CommandLineConfig clConfig = _config.getCommandLineConfig(commandLineConfigName);
-		getCommandLineExecutor().runProcess(null, command_text, clConfig);
-		logger.info(String.format("Command output:%n%s", getCommandLineExecutor().getCommandOutput()));
-	}
-
-	/**
 	 * Assembles and executes a commandline process using a ProcessConfig and a table of arguments.
 	 * The command is built from four segments: {command} {starting_args} {feature_args} {ending_args}.
 	 *
@@ -267,14 +256,25 @@ public class Process_Helper {
 	}
 
 	/**
+	 * Executes a raw command string on the commandline using a specific CommandLineConfig.
+	 * @param commandLineConfigName The name of the CommandLineConfig to use.
+	 * @param command_text The command to execute.
+	 */
+	public void ExecutedTemplatedCommand(String commandLineConfigName, String command_text) throws Throwable {
+		CommandLineConfig clConfig = _config.getCommandLineConfig(commandLineConfigName);
+		getCommandLineExecutor().runProcess(null, command_text, clConfig);
+		logger.info(String.format("Command output:%n%s", getCommandLineExecutor().getCommandOutput()));
+	}
+
+	/**
 	 * Assembles and executes a commandline process using a ProcessConfig, a table of arguments,
 	 * and an explicit CommandLineConfig name that overrides the ProcessConfig's binding.
 	 *
 	 * @param processConfigName The name of the ProcessConfig to use.
-	 * @param dataTable The table of arguments with "args" and "value" columns.
 	 * @param commandLineConfigName The name of the CommandLineConfig to use (overrides config-time binding).
+	 * @param dataTable The table of arguments with "args" and "value" columns.
 	 */
-	public void ExecuteTemplatedCommandProcesWithParameters(String processConfigName, DataTable dataTable, String commandLineConfigName) throws Throwable {
+	public void ExecuteTemplatedCommandWithTemplatedProcessWithParameters(String processConfigName, String commandLineConfigName, DataTable dataTable) throws Throwable {
 		// Resolve the explicit CommandLineConfig before delegating to the main method,
 		// then temporarily set it on the ProcessConfig so the main method picks it up.
 		ProcessConfig processConfig = _config.getProcessConfig(processConfigName);

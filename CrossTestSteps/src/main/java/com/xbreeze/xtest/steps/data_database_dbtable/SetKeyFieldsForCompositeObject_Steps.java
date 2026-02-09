@@ -15,7 +15,7 @@ public class SetKeyFieldsForCompositeObject_Steps
     }
 
     @When("^I set (\\(.*\\)) as key for object (.+)$")
-    public void ISetKeyForCompositeObject(
+    public void When_EN_SetKeyFieldsForCompositeObject_A1B19A37_FF3E_4F42_897F_E2E53C8F4D4E(
         String key_fields,
         String composite_object
     ) throws Throwable

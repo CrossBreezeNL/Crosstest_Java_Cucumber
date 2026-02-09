@@ -83,26 +83,65 @@ Tests use JUnit 5 Platform Suite (`@Suite` + `@SelectClasspathResource("features
 
 ## Step Definitions
 
-Step definitions support both English and Dutch (NL) Gherkin keywords. They cover:
+Step definitions support both English and Dutch (NL) Gherkin keywords. They are **generated from a PowerDesigner model** — the Java files in `CrossTestSteps` are generated code and should not be manually edited. The core helper classes in `CrossTest` (e.g., `Process_Helper`, `Result_Helper`) contain the actual logic and are manually maintained.
+
+Step definitions cover:
 - **Database context**: transactions, connections
 - **Database tables**: insert, retrieve, empty, delete operations
 - **Queries**: execute SQL statements
 - **Object templates**: attribute configuration
 - **Process config**: parameter configuration
 - **Process execution**: run ETL processes, command-line execution, command-line with configurable arguments
-- **Result comparison**: compare actual vs expected data tables
+- **Result comparison**: compare actual vs expected data tables, commandline output assertions
 
-### Commandline with arguments (ExecuteCommandLineWithArgs)
+### Commandline execution
 
-The `ExecuteCommandLineWithArgs` step assembles and executes commandline processes from a ProcessConfig and a feature file arguments table. Key design decisions:
+Commandline steps use `CommandLineProcessExecutor` (wraps Java `ProcessBuilder`) directly — no `ProcessServerConfig` binding is required.
 
-- **No ProcessServerConfig required** — `ExecuteCommand` and `ExecuteCommandLineWithArgs` use `CommandLineProcessExecutor` directly. ProcessConfigs for commandline execution do not need a `processServerConfigName` attribute.
-- **Command assembly**: `{command} {starting_args} {feature_args} {ending_args}` — the `command` parameter should contain the tool and subcommand (e.g., `dbt run`, `helm upgrade --install my-release my-chart`). `starting_args` is for flags only (e.g., `--full-refresh`), not tool names.
+#### Step sentences (EN)
+
+| Step | Description |
+|:--- |:--- |
+| `I execute the following command` | Execute a raw command using the default shell |
+| `I execute the following {config} command:` | Execute a raw command using a specific `CommandLineConfig` |
+| `I execute the {process} commandline process using the following arguments:` | Assemble and execute from ProcessConfig + args table |
+| `I execute the {process} commandline process with {config} using the following arguments:` | Same, with explicit CommandLineConfig override |
+| `the commandline output must be:` | Assert exact match on command output |
+| `the commandline output must contain:` | Assert substring match on command output |
+
+#### Command assembly
+
+The `ExecuteTemplatedCommandProcesWithParameters` method assembles commands from four segments: `{command} {starting_args} {feature_args} {ending_args}`.
+
+Key design decisions:
+- **`command`** should contain the tool and subcommand (e.g., `dbt run`, `helm upgrade --install my-release my-chart`). `starting_args` is for flags only (e.g., `--full-refresh`), not tool names.
+- **`feature_args` takes precedence** — if `feature_args` is non-empty (from config or table), it is used as-is and individual args from the table are ignored. Setting `feature_args` to empty in the table clears the config default and allows individual arg construction.
 - **Dot-notation grouping** — args like `vars.db`, `vars.ldts` are grouped by prefix and formatted using `group_format`, `group_entry_format`, and `group_entry_separator` config parameters.
-- **Config-level group defaults** — dot-notation parameters in the ProcessConfig (e.g., `vars.db=default_database`) serve as defaults that feature-level entries can override or extend.
+- **Config-level defaults** — both dot-notation parameters and regular arguments in the ProcessConfig serve as defaults that feature-level entries can override or extend.
 - **Arg formatting** — customizable via `arg_key_prefix` (default `--`), `arg_key_value_separator` (default space), and `arg_value_format` (default `{value}`).
-- **Test-only steps** — assertion steps like "the assembled commandline should be" belong in `TestCrossTest` (class `InternalProcessAssertionSteps`), not in `CrossTestSteps`, since they test internal assembly logic and are not for end users.
-- **Documentation** — `Documentation/docs/Steps/Process.md` contains the user-facing documentation for this feature.
+
+#### CommandLineConfig
+
+Optional XML config for non-default shells. Attributes: `tool`, `toolFlags`, `workingDirectory`. If no config is specified, the OS default is used (`cmd.exe /c` on Windows, `bash -c` on other).
+
+```xml
+<CommandLineConfig name="powershell" tool="powershell.exe" toolFlags="-Command"/>
+<CommandLineConfig name="custom_workdir" workingDirectory="C:\temp"/>
+```
+
+#### Helper architecture
+
+- **`Process_Helper`** — contains all commandline execution logic (`ExecuteCommand`, `ExecutedTemplatedCommand`, `ExecuteTemplatedCommandProcesWithParameters`, `ExecuteTemplatedCommandWithTemplatedProcessWithParameters`) and command output retrieval (`getLastCommandOutput`, `getLastAssembledCommand`, `getLastExecutionToolPrefix`).
+- **`Result_Helper`** — extends `Database_Helper` for result comparison, and delegates to `Process_Helper` (injected via PicoContainer) for commandline output assertions (`CommandlineOutputMustBe`, `CommandlineOutputMustContain`). Output is normalized for cross-platform consistency (line endings, trailing whitespace).
+
+### Test-only assertion steps
+
+Assertion steps like "the assembled commandline should be" and "the execution tool prefix should be" belong in `TestCrossTest` (class `InternalProcessAssertionSteps`), not in `CrossTestSteps`, since they test internal assembly logic and are not for end users.
+
+### Documentation
+
+- `Documentation/docs/Steps/Process.md` — user-facing documentation for process/commandline steps
+- `Documentation/docs/Steps/Result.md` — user-facing documentation for result/output assertion steps
 
 ## Coding Conventions
 
@@ -112,6 +151,7 @@ The `ExecuteCommandLineWithArgs` step assembles and executes commandline process
 - Configuration is XML-based using JAXB unmarshalling
 - Process executors implement the `ProcessExecutor` interface
 - Step definition classes use Cucumber PicoContainer for dependency injection
+- Step definition files in `CrossTestSteps` are **generated** — do not edit manually
 - Current version: `1.0.22` (defined as `crosstest.version` property in pom.xml files)
 
 ## CI Pipeline (Azure Pipelines)
@@ -119,3 +159,9 @@ The `ExecuteCommandLineWithArgs` step assembles and executes commandline process
 Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
 1. **Check** - SpotBugs static analysis
 2. **Package** - Maven package
+
+## Testing Notes
+
+- PowerCenter tests require a server connection and will fail locally — skip with: `"-Dcucumber.features=classpath:features/Process/CommandAssembly_BasicArgs.feature,..."` targeting specific feature files
+- Run specific tagged tests: `mvn test -f TestCrossTest\pom.xml -Dtest=TestCrossTest "-Dcucumber.filter.tags=@Debug"`
+- Use `-f TestCrossTest\pom.xml` instead of `cd TestCrossTest` to avoid Windows path issues in bash
