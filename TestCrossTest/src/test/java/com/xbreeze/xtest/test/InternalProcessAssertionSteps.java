@@ -1,8 +1,10 @@
 package com.xbreeze.xtest.test;
 
 import com.xbreeze.xtest.modules.process.Process_Helper;
+import com.xbreeze.xtest.exception.XTestProcessException;
 
 import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import io.cucumber.java.nl.Dan;
 
 /**
@@ -15,6 +17,18 @@ public class InternalProcessAssertionSteps {
 
     public InternalProcessAssertionSteps(Process_Helper Process_helper) {
         _Process_helper = Process_helper;
+    }
+
+    @When("^I execute the following ([a-zA-Z0-9_@$#.]+) command expecting a timeout:$")
+    public void When_EN_ExecuteCommandExpectingTimeout(String commandLineConfigName, String commandText) throws Throwable {
+        try {
+            _Process_helper.ExecutedTemplatedCommand(commandLineConfigName, commandText);
+            throw new AssertionError("Expected command to time out, but it completed successfully.");
+        } catch (XTestProcessException e) {
+            if (!e.getMessage().contains("timed out")) {
+                throw new AssertionError("Expected a timeout error, but got: " + e.getMessage());
+            }
+        }
     }
 
     @Then("^the assembled commandline should be:$")

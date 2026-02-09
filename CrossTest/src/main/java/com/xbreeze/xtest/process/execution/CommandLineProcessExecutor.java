@@ -6,10 +6,11 @@ package com.xbreeze.xtest.process.execution;
 import com.xbreeze.xtest.config.CommandLineConfig;
 import com.xbreeze.xtest.config.ProcessConfig;
 import com.xbreeze.xtest.exception.XTestProcessException;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -64,11 +65,13 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
         String tool;
         String toolFlag;
         String workingDirectory;
+        int timeoutSeconds;
 
         if (clConfig != null) {
             tool = clConfig.getTool();
             toolFlag = clConfig.getToolFlags();
             workingDirectory = clConfig.getWorkingDirectory();
+            timeoutSeconds = clConfig.getTimeout();
         } else {
             // Default behavior: detect OS and use default shell
             String os = System.getProperty("os.name").toLowerCase();
@@ -80,6 +83,7 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
                 toolFlag = "-c";
             }
             workingDirectory = null;
+            timeoutSeconds = 0;
         }
 
         // Store the command text and tool prefix for verification
@@ -90,33 +94,48 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
         if (workingDirectory != null && !workingDirectory.isEmpty()) {
             builder.directory(new File(workingDirectory));
         }
-        // Merge stderr with stdout so all output is captured together
-        builder.redirectErrorStream(true);
-        StringBuilder output = new StringBuilder();
+        // Redirect stdout+stderr to a temp file so we can use waitFor(timeout) on the main thread
+        // without risking a pipe buffer deadlock. The output is read from the file after the process completes.
+        File outputFile = null;
         try {
-            // Start the process and read its output (stdout and stderr)
+            outputFile = File.createTempFile("xtest-cmd-", ".out");
+            outputFile.deleteOnExit();
+            builder.redirectErrorStream(true);
+            builder.redirectOutput(outputFile);
+
             process = builder.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            // Read all output lines from the process
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append(System.lineSeparator());
+
+            // Wait for the process to finish, with optional timeout
+            if (timeoutSeconds > 0) {
+                boolean finished = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
+                if (!finished) {
+                    process.destroyForcibly();
+                    commandOutput = readFile(outputFile);
+                    throw new XTestProcessException("Command timed out after " + timeoutSeconds + " seconds.\nOutput:\n" + commandOutput);
+                }
+            } else {
+                process.waitFor();
             }
-            // Wait for the process to finish and get the exit code
-            int exitCode = process.waitFor();
-            commandOutput = output.toString();
+
+            commandOutput = readFile(outputFile);
+
+            int exitCode = process.exitValue();
             if (exitCode != 0) {
-                // Throw an exception if the command failed (non-zero exit code)
                 throw new XTestProcessException("Command failed with exit code: " + exitCode + "\nOutput:\n" + commandOutput);
             }
         } catch (IOException | InterruptedException e) {
-            // Capture any output produced before the error/exception
-            commandOutput = output.toString();
-            // Ensure the process is killed if an error occurs
+            // Read any output produced before the error
+            if (outputFile != null && outputFile.exists()) {
+                commandOutput = readFile(outputFile);
+            }
             if (process != null && process.isAlive()) {
                 process.destroyForcibly();
             }
             throw new XTestProcessException("Error running command: " + e.getMessage() + "\nOutput:\n" + commandOutput);
+        } finally {
+            if (outputFile != null) {
+                outputFile.delete();
+            }
         }
     }
 
@@ -155,5 +174,16 @@ public class CommandLineProcessExecutor implements ProcessExecutor {
      */
     public String getLastToolPrefix() {
         return lastToolPrefix;
+    }
+
+    /**
+     * Reads the contents of a file as a string using the platform default charset.
+     */
+    private String readFile(File file) {
+        try {
+            return new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
+        } catch (IOException e) {
+            return "";
+        }
     }
 }

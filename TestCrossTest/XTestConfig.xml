@@ -7,6 +7,8 @@
 		<CommandLineConfig name="default_shell"/>
 		<CommandLineConfig name="custom_workdir"
 			workingDirectory="C:\temp"/>
+		<CommandLineConfig name="short_timeout"
+			timeout="2"/>
 	</CommandLineConfigs>
 
 	<CompositeObjects>

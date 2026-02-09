@@ -36,6 +36,7 @@ public class CommandLineConfig {
 	private String _tool = IS_WINDOWS ? "cmd.exe" : "bash";
 	private String _toolFlags = IS_WINDOWS ? "/c" : "-c";
 	private String _workingDirectory;
+	private int _timeout = 0;
 
 	public CommandLineConfig() {
 		super();
@@ -75,5 +76,14 @@ public class CommandLineConfig {
 
 	public void setWorkingDirectory(String workingDirectory) {
 		this._workingDirectory = workingDirectory;
+	}
+
+	@XmlAttribute(name="timeout")
+	public int getTimeout() {
+		return _timeout;
+	}
+
+	public void setTimeout(int timeout) {
+		this._timeout = timeout;
 	}
 }

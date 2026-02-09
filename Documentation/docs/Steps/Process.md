@@ -418,6 +418,8 @@ CommandLineConfigs are defined inside a `CommandLineConfigs` wrapper element in 
       tool="powershell.exe" toolFlags="-Command"/>
     <CommandLineConfig name="custom_workdir"
       workingDirectory="C:\workdir"/>
+    <CommandLineConfig name="with_timeout"
+      timeout="300"/>
   </CommandLineConfigs>
   ...
 </XTestConfig>
@@ -431,6 +433,7 @@ CommandLineConfigs are defined inside a `CommandLineConfigs` wrapper element in 
 | `tool` | No | `cmd.exe` (Windows) / `bash` (other) | The shell executable to use. |
 | `toolFlags` | No | `/c` (Windows) / `-c` (other) | The flag(s) passed to the shell to execute a command string. |
 | `workingDirectory` | No | _(inherit)_ | Working directory for command execution. |
+| `timeout` | No | `0` (no timeout) | Maximum time in seconds to wait for the command to complete. If the command exceeds this time, it is forcibly terminated and the test fails with a timeout error. A value of `0` means no timeout (wait indefinitely). |
 
 ### Binding a CommandLineConfig to a ProcessConfig
 

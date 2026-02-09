@@ -59,3 +59,23 @@ Feature: ProcessExecutor - Command line execution
     """
     echo PowerShell NL test
     """
+
+  # ==========================================================================
+  # Timeout
+  # ==========================================================================
+
+  Scenario: Run a fast command with a timeout - should succeed
+    When I execute the following short_timeout command:
+    """
+    echo Fast command
+    """
+    Then the commandline output must contain:
+    """
+    Fast command
+    """
+
+  Scenario: Run a slow command with a short timeout - should time out
+    When I execute the following short_timeout command expecting a timeout:
+    """
+    ping -n 10 127.0.0.1
+    """
