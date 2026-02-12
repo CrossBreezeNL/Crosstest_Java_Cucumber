@@ -20,7 +20,7 @@ Here you can find the release notes of all Java CrossTest releases up till the r
 [//]: # (>         * [X] Some issue...)
 
 ## Version 1.0
-- [ ] 1.0.22 <sup>12-01-2026</sup>
+- [ ] 1.0.22 <sup>12-02-2026</sup>
 > New release
 > !!! success "New features"    
 >     * [ ] Config
