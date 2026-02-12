@@ -20,6 +20,19 @@ Here you can find the release notes of all Java CrossTest releases up till the r
 [//]: # (>         * [X] Some issue...)
 
 ## Version 1.0
+- [ ] 1.0.22 <sup>12-01-2026</sup>
+> New release
+> !!! success "New features"    
+>     * [ ] Config
+>         - [X] Added CommandLineConfig support with tool, flags, timeout and working dir parameters
+>         - [X] Support for default parameters and dot notation array definitions for commandline processes
+>         - [X] Support for parameter and array formatting options for commandline processes
+>     * [ ] Process execution
+>         - [X] Execution of commandline commands
+>         - [X] Execution of (templated) commandline processes
+>     * [ ] Result
+>         - [X] Output verification of commandline process (must contain, must be)
+
 - [ ] 1.0.21 <sup>18-11-2022</sup>
 > New release
 > !!! warning "Bug fixes"
