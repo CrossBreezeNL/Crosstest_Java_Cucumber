@@ -1,0 +1,6 @@
+!!!! WARNING: The documentation for Java/Cucumber has not been generated from PowerDesigner anymore,
+!!!! due to Claude assistance which generated perfect documentation matching the documentation and test scenarios.
+
+When you want to publish a new version of CrossTest Java/Cucumber documentation, make sure to:
+1. Build the documentation with mkdocs_build.ps1.
+2. Upload the contents of the site/ folder to ftp://xbreeze@x-breeze.com/test.x-breeze.com/Java/

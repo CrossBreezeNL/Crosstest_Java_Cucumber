@@ -18,7 +18,7 @@ The details of every argument of the step are listed below.
 
 | Parameter    | Datatype          | Description          |
 |:---          |:---               |:---                  |
-|expected results | DataTable | The table with the expected results. See [TestDataTable](../Tables#testdatatable). |
+|expected results | DataTable | The table with the expected results. See [TestDataTable](Tables.md#testdatatable). |
 
 ### Examples
 

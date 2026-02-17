@@ -68,7 +68,7 @@ The details of every argument of the step are listed below.
 |:---          |:---               |:---                  |
 |database config | String | The name of the database config |
 |table name | String | The name of the table to insert the data into |
-|data to insert | DataTable | The data to load into the table. See [TestDataTable](../Tables#testdatatable). |
+|data to insert | DataTable | The data to load into the table. See [TestDataTable](Tables.md#testdatatable). |
 
 ### Examples
 
@@ -202,7 +202,7 @@ The details of every argument of the step are listed below.
 |object template | String | The name of the object template to apply |
 |database config | String | The name of the database config |
 |table name | String | The name of the table to insert data into |
-|data to insert | DataTable | The data to load into the table. See [TestDataTable](../Tables#testdatatable). |
+|data to insert | DataTable | The data to load into the table. See [TestDataTable](Tables.md#testdatatable). |
 
 ### Examples
 

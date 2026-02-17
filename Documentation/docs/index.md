@@ -2,7 +2,7 @@
 This wiki contains the documentation of the Java/Cucumber version of CrossTest.
 Documentation for the .Net/Specflow version can be found [here](../DotNet)
 
-See the [getting started](./GettingStarted) page for more information on how to configure CrossTest.
+See the [getting started](./GettingStarted.md) page for more information on how to configure CrossTest.
 
 ## Example test scenario
 Below is a simple example of a test scenario where data is inserted into a table, then a ETL proces is run and finally the contents of a table is compared with an expected result.

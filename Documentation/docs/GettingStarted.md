@@ -91,7 +91,7 @@ If you are using a different JDBC driver than SQL Server, also update the depend
 </XTestConfig>
 ```
 
-This is all configuration needed for running the first test. For an explanation of all configuration options see the [Configuration](../Configuration/) section.
+This is all configuration needed for running the first test. For an explanation of all configuration options see the [Configuration](./Configuration/index.md) section.
 
 ### Script file to run the tests
 The script should contain the following statement. The example below will run all the feature files that are stored in the testfiles subfolder.
@@ -126,7 +126,7 @@ INFO: Loading ObjectFactory via service loader: io.cucumber.picocontainer.PicoFa
 ```
 
 That's it! you have successfully run a first Cucumber/CrossTest feature.
-For more information about how to use Crosstest look at the [Configuration](../Configuration) and [Step](../Steps) documentation.
+For more information about how to use Crosstest look at the [Configuration](./Configuration/index.md) and [Step](./Steps/index.md) documentation.
 
 
 ## Bugs & issues
