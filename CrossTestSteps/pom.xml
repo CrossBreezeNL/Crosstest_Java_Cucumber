@@ -3,7 +3,7 @@
   <groupId>com.x-breeze.test</groupId>
   <artifactId>CrossTest</artifactId>
   <properties>
-  	<crosstest.version>1.0.21</crosstest.version>
+  	<crosstest.version>1.0.22</crosstest.version>
   	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <version>${crosstest.version}</version>
@@ -109,6 +109,15 @@
 				        </execution>
 				      </executions>
 				    </plugin>
+					 <plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>0.9.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+						</configuration>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>		

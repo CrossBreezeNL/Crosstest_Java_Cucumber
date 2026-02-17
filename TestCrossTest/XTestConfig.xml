@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <XTestConfig xmlns:xi="http://www.w3.org/2001/XInclude" debug="true" emptyStringValue="''">
 
+	<CommandLineConfigs>
+		<CommandLineConfig name="powershell"
+			tool="powershell.exe" toolFlags="-Command"/>
+		<CommandLineConfig name="default_shell"/>
+		<CommandLineConfig name="custom_workdir"
+			workingDirectory="C:\temp"/>
+		<CommandLineConfig name="short_timeout"
+			timeout="2"/>
+	</CommandLineConfigs>
+
 	<CompositeObjects>
 		<CompositeObject name="Customer">
 			<ContextTables>
@@ -279,6 +289,103 @@
 			</Parameters>
 		</ProcessConfig>
 		<ProcessConfig name="executordemo" container="Demo" processServerConfigName="executordemo" prefix="wf_m_"/>
+	   	<ProcessConfig name="dbt">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="ending_args" value="--target dev"/>
+				<Parameter name="group_format" value="&quot;{{entries}}&quot;"/>
+				<Parameter name="group_entry_format" value="'{key}': '{value}'"/>
+				<Parameter name="group_entry_separator" value=", "/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_with_default_vars">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="ending_args" value="--target dev"/>
+				<Parameter name="group_format" value="&quot;{{entries}}&quot;"/>
+				<Parameter name="group_entry_format" value="'{key}': '{value}'"/>
+				<Parameter name="group_entry_separator" value=", "/>
+				<Parameter name="vars.db" value="default_database"/>
+				<Parameter name="vars.ldts" value="2025-01-01 00:00:00"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_seed">
+			<Parameters>
+				<Parameter name="command" value="echo dbt seed"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_test">
+			<Parameters>
+				<Parameter name="command" value="echo dbt test"/>
+				<Parameter name="ending_args" value="--target dev --store-failures"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_with_default_args">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="feature_args" value="--select my_default_model"/>
+				<Parameter name="ending_args" value="--target dev"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_command_only">
+			<Parameters>
+				<Parameter name="command" value="echo"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_no_params">
+		</ProcessConfig>
+		<ProcessConfig name="java_style">
+			<Parameters>
+				<Parameter name="command" value="echo java -jar app.jar"/>
+				<Parameter name="arg_key_prefix" value="-D"/>
+				<Parameter name="arg_key_value_separator" value="="/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="helm">
+			<Parameters>
+				<Parameter name="command" value="echo helm upgrade --install my-release my-chart"/>
+				<Parameter name="group_entry_format" value="{key}={value}"/>
+				<Parameter name="group_entry_separator" value=","/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="quoted_args">
+			<Parameters>
+				<Parameter name="command" value="echo mytool"/>
+				<Parameter name="arg_value_format" value="&quot;{value}&quot;"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_with_default_regular_args">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="select" value="my_default_model"/>
+				<Parameter name="ending_args" value="--target dev"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="tool_with_defaults">
+			<Parameters>
+				<Parameter name="command" value="echo mytool"/>
+				<Parameter name="path" value="c:\data"/>
+				<Parameter name="format" value="csv"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_with_default_regular_and_vars">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="select" value="my_default_model"/>
+				<Parameter name="ending_args" value="--target dev"/>
+				<Parameter name="group_format" value="&quot;{{entries}}&quot;"/>
+				<Parameter name="group_entry_format" value="'{key}': '{value}'"/>
+				<Parameter name="group_entry_separator" value=", "/>
+				<Parameter name="vars.db" value="default_database"/>
+				<Parameter name="vars.ldts" value="2025-01-01 00:00:00"/>
+			</Parameters>
+		</ProcessConfig>
+		<ProcessConfig name="dbt_with_clconfig" commandLineConfigName="default_shell">
+			<Parameters>
+				<Parameter name="command" value="echo dbt run"/>
+				<Parameter name="ending_args" value="--target dev"/>
+			</Parameters>
+		</ProcessConfig>
 	</ProcessConfigs>
 
 	<ProcessServerConfigs>

@@ -28,7 +28,7 @@
 	<groupId>com.x-breeze.test</groupId>
 	<artifactId>CucumberDataComparison</artifactId>
 	<properties>
-		<crosstest.version>1.0.21</crosstest.version>
+		<crosstest.version>1.0.22</crosstest.version>
 	</properties>
 	<version>${crosstest.version}</version>
 	<name>${project.groupId}:${project.artifactId}</name>
@@ -96,7 +96,7 @@
 		<profile>
 			<id>release</id>
 			<build>
-				<plugins>
+				<plugins>					
 					<plugin>
 						<!-- build jar file with sources (Sonatype requirement) -->
 						<groupId>org.apache.maven.plugins</groupId>
@@ -142,6 +142,15 @@
 								</goals>
 							</execution>
 						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.central</groupId>
+						<artifactId>central-publishing-maven-plugin</artifactId>
+						<version>0.9.0</version>
+						<extensions>true</extensions>
+						<configuration>
+							<publishingServerId>central</publishingServerId>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

@@ -91,6 +91,10 @@ public class ProcessServerConfig {
 	@XmlElement(name="Property")
 	@XmlElementWrapper(name="Properties")
 	public ArrayList<SecurableConfigProperty> getProperties() {
+		// If there are no properties defined, only create an empty array.
+		if (this._properties == null) {
+			this._properties = new ArrayList<>();
+		}
 		return this._properties;
 	}
 	

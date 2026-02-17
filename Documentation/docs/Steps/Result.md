@@ -18,7 +18,7 @@ The details of every argument of the step are listed below.
 
 | Parameter    | Datatype          | Description          |
 |:---          |:---               |:---                  |
-|expected results | DataTable | The table with the expected results. See [TestDataTable](../Tables#testdatatable). |
+|expected results | DataTable | The table with the expected results. See [TestDataTable](Tables.md#testdatatable). |
 
 ### Examples
 
@@ -44,6 +44,89 @@ The details of every argument of the step are listed below.
   | Id | Description    |
   | 1  | 'FirstRow'       |
   | 2  | 'SecondRow' |
+```
+
+## Commandline output
+After executing a command, the output can be verified using assertion steps. These steps compare the output of the last executed command against an expected value provided as a docstring.
+
+The command output is also logged at INFO level, so it is visible when `debug="true"` is set in the XTestConfig.
+
+**Note:** Both the actual output and expected text are normalized before comparison: line endings are unified (`\r\n` → `\n`) and trailing whitespace is stripped from each line. This ensures assertions work consistently across Windows and non-Windows platforms.
+
+### Commandline output must contain
+Assert that the output of the last executed command contains the expected text (substring match).
+
+#### Sentences
+| Type          | Language         | Sentence      |
+|:---           |:---              |:---           |
+| Then | en | `^the commandline output must contain:$` |
+| Then | nl | `^de commandline uitvoer het volgende moet bevatten:$` |
+
+#### Arguments
+| Parameter    | Datatype          | Description          |
+|:---          |:---               |:---                  |
+| expected text | String | The text that the command output must contain (docstring). |
+
+#### Examples
+
+```gherkin
+When I execute the following command
+"""
+echo Hello World
+"""
+Then the commandline output must contain:
+"""
+Hello World
+"""
+```
+
+```gherkin
+Wanneer ik het volgende commando uitvoer
+"""
+echo Hallo Wereld
+"""
+Dan de commandline uitvoer het volgende moet bevatten:
+"""
+Hallo Wereld
+"""
+```
+
+### Commandline output must be
+Assert that the output of the last executed command matches the expected text exactly (after trimming leading/trailing whitespace on both sides).
+
+#### Sentences
+| Type          | Language         | Sentence      |
+|:---           |:---              |:---           |
+| Then | en | `^the commandline output must be:$` |
+| Then | nl | `^de commandline uitvoer als volgt moet zijn:$` |
+
+#### Arguments
+| Parameter    | Datatype          | Description          |
+|:---          |:---               |:---                  |
+| expected text | String | The exact expected command output (docstring). Leading and trailing whitespace is trimmed before comparison. |
+
+#### Examples
+
+```gherkin
+When I execute the following command
+"""
+echo Hello World
+"""
+Then the commandline output must be:
+"""
+Hello World
+"""
+```
+
+```gherkin
+Wanneer ik het volgende commando uitvoer
+"""
+echo Hallo Wereld
+"""
+Dan de commandline uitvoer als volgt moet zijn:
+"""
+Hallo Wereld
+"""
 ```
 
 ## Store contents of field in variable

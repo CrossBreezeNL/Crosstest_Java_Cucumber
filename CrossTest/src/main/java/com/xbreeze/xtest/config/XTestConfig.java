@@ -84,6 +84,7 @@ public class XTestConfig {
 
 	private XTestConfig _config = null;
 	static final Logger logger = Logger.getLogger("");
+	private ArrayList<CommandLineConfig> _commandLineConfigs;
 	private ArrayList<DatabaseConfig> _databaseConfigs;
 	private ArrayList<DatabaseServerConfig> _databaseServerConfigs;
 	private ArrayList<ProcessConfig> _processConfigs;
@@ -95,10 +96,11 @@ public class XTestConfig {
 	private String _emptyStringValue;
 	
 	public XTestConfig() throws XTestException {
+		_commandLineConfigs = new ArrayList<>();
 		_databaseConfigs = new ArrayList<>();
 		_databaseServerConfigs = new ArrayList<>();
 		_processConfigs = new ArrayList<>();
-		_processServerConfigs = new ArrayList<>();		
+		_processServerConfigs = new ArrayList<>();
 		_compositeObjects = new ArrayList<>();
 		_objectTemplates = new ArrayList<>();
 		_credentialProviders = new ArrayList<>();
@@ -404,12 +406,23 @@ public class XTestConfig {
 			if (psc.getName().equalsIgnoreCase(configName))
 				return psc;
 		}
-		
+
 		//throw new exception if config was not found
 		throw new XTestProcessException(String.format("Process server config [%s] does not exist", configName));
 	}
-	
-	
+
+	public CommandLineConfig getCommandLineConfig(String configName) throws XTestProcessException {
+		if (configName == null || configName.isEmpty()) {
+			return null;
+		}
+		for (CommandLineConfig clc:_commandLineConfigs) {
+			if (clc.getName().equalsIgnoreCase(configName))
+				return clc;
+		}
+		//throw exception if config was not found
+		throw new XTestProcessException(String.format("Commandline config [%s] does not exist", configName));
+	}
+
 	public CredentialProviderConfig getCredentialProviderConfig(String configName) throws XTestException {
 		if (configName==null || configName.isEmpty()) {
 			return null;
@@ -444,6 +457,16 @@ public class XTestConfig {
 		return this._emptyStringValue != null;
 	}
 	
+	@XmlElement(name="CommandLineConfig")
+	@XmlElementWrapper(name="CommandLineConfigs")
+	public ArrayList<CommandLineConfig> getCommandLineConfigs(){
+		return this._commandLineConfigs;
+	}
+
+	public void setCommandLineConfigs(ArrayList<CommandLineConfig> commandLineConfigs) {
+		this._commandLineConfigs = commandLineConfigs;
+	}
+
 	@XmlElement(name="DatabaseConfig")
 	@XmlElementWrapper(name="DatabaseConfigs")
 	public ArrayList<DatabaseConfig> getDatabaseConfigs(){
