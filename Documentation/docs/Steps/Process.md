@@ -67,8 +67,8 @@ Execute a command using a specific [CommandLineConfig](#commandlineconfig) inste
 ### Sentences
 | Type          | Language         | Sentence      |
 |:---           |:---              |:---           |
-| When | en | `^I execute the following ([a-zA-Z0-9_@$#]+) command:$` |
-| When | nl | `^ik het volgende ([a-zA-Z0-9_@$#]+) commando uitvoer:$` |
+| When | en | `^I execute the following ([a-zA-Z0-9_@$#.]+) command:$` |
+| When | nl | `^ik het volgende ([a-zA-Z0-9_@$#.]+) commando uitvoer:$` |
 
 
 ### Arguments
@@ -103,8 +103,8 @@ This step does not require a ProcessServerConfig binding. The CommandLineProcess
 ### Sentences
 | Type          | Language         | Sentence      |
 |:---           |:---              |:---           |
-| When | en | ^I execute the ([a-zA-Z0-9_@$#]+) commandline process using the following arguments:$ |
-| When | nl | ^ik het ([a-zA-Z0-9_@$#]+) commandline proces uitvoer met de volgende argumenten:$ |
+| When | en | ^I execute the ([a-zA-Z0-9_@$#.]+) commandline process using the following arguments:$ |
+| When | nl | ^ik het ([a-zA-Z0-9_@$#.]+) commandline proces uitvoer met de volgende argumenten:$ |
 
 ### Arguments
 The details of every argument of the step are listed below.
@@ -378,8 +378,8 @@ The commandline config specified in the step sentence overrides any `commandLine
 ### Sentences
 | Type          | Language         | Sentence      |
 |:---           |:---              |:---           |
-| When | en | ^I execute the ([a-zA-Z0-9_@$#]+) commandline process with ([a-zA-Z0-9_@$#]+) using the following arguments:$ |
-| When | nl | ^ik het ([a-zA-Z0-9_@$#]+) commandline proces uitvoer via ([a-zA-Z0-9_@$#]+) met de volgende argumenten:$ |
+| When | en | ^I execute the ([a-zA-Z0-9_@$#.]+) commandline process with ([a-zA-Z0-9_@$#.]+) using the following arguments:$ |
+| When | nl | ^ik het ([a-zA-Z0-9_@$#.]+) commandline proces uitvoer via ([a-zA-Z0-9_@$#.]+) met de volgende argumenten:$ |
 
 ### Arguments
 | Parameter    | Datatype          | Description          |

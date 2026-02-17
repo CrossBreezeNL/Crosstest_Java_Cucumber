@@ -10,6 +10,19 @@ The configuration can be [splitted in multiple files](./config_include.md)
 <!-- Set debug="true" for console debugging output-->
 <!-- Set emptyStringValue to a string constant that can be used to set and check for empty string values -->
 <XTestConfig debug="true" emptyStringValue="''">
+	<CommandLineConfigs>
+		<!-- CommandLineConfigs allow overriding the default shell used for commandline execution steps -->
+		<!-- By default, cmd.exe /c is used on Windows and bash -c on other platforms -->
+		<!-- All attributes except name are optional; omitted attributes fall back to OS defaults -->
+		<CommandLineConfig name="powershell"
+			tool="powershell.exe" toolFlags="-Command"/>
+		<!-- Use workingDirectory to set the working directory for the process -->
+		<CommandLineConfig name="custom_workdir"
+			workingDirectory="C:\temp"/>
+		<!-- Use timeout (in seconds) to limit how long a command can run. 0 = no timeout (default) -->
+		<CommandLineConfig name="short_timeout"
+			timeout="30"/>
+	</CommandLineConfigs>
 	<CompositeObjects>
         <!-- Composite objects can be configured in the config or defined/modified via step sentences -->
 		<CompositeObject name="Customer">
@@ -78,7 +91,7 @@ The configuration can be [splitted in multiple files](./config_include.md)
 		<ObjectTemplate name="demo">
 			<Attributes>
 				<Attribute name="CREATE_DD" value="2010-01-01" />
-				<Attribute name="CUST_ID" seed="1" increment="1">
+				<Attribute name="CUST_ID" seed="1" increment="1"/>
 			</Attributes>
 		</ObjectTemplate>
 		<ObjectTemplate name="newdemo">
@@ -98,6 +111,47 @@ The configuration can be [splitted in multiple files](./config_include.md)
 		</ProcessConfig>
 		    <!-- Process config referencing the task execution engine -->
 		<ProcessConfig name="demotask" container="Demo" processServerConfigName="demotask" prefix=""/>
+		<!-- Commandline process configs do not need a processServerConfigName or container. -->
+		<!-- The command is assembled from reserved parameters and arguments provided in the feature file. -->
+		<!-- See the Process steps documentation for details on command assembly. -->
+		<ProcessConfig name="dbt">
+			<Parameters>
+				<!-- The base command to execute -->
+				<Parameter name="command" value="dbt run"/>
+				<!-- Arguments appended at the end of the assembled command -->
+				<Parameter name="ending_args" value="--target dev"/>
+				<!-- Formatting for grouped (dot-notation) arguments -->
+				<Parameter name="group_format" value="&quot;{{entries}}&quot;"/>
+				<Parameter name="group_entry_format" value="'{key}': '{value}'"/>
+				<Parameter name="group_entry_separator" value=", "/>
+			</Parameters>
+		</ProcessConfig>
+		<!-- Commandline process config with a CommandLineConfig binding -->
+		<!-- The commandLineConfigName attribute binds this process config to a specific CommandLineConfig -->
+		<ProcessConfig name="dbt_custom_shell" commandLineConfigName="powershell">
+			<Parameters>
+				<Parameter name="command" value="dbt run"/>
+				<Parameter name="ending_args" value="--target dev"/>
+			</Parameters>
+		</ProcessConfig>
+		<!-- Commandline process config with default argument values -->
+		<!-- Parameters that are not reserved names become regular argument defaults -->
+		<ProcessConfig name="mytool">
+			<Parameters>
+				<Parameter name="command" value="mytool export"/>
+				<!-- These are regular argument defaults, included unless overridden in the feature table -->
+				<Parameter name="path" value="c:\data"/>
+				<Parameter name="format" value="csv"/>
+			</Parameters>
+		</ProcessConfig>
+		<!-- Java-style arguments with custom key prefix and separator -->
+		<ProcessConfig name="java_app">
+			<Parameters>
+				<Parameter name="command" value="java -jar app.jar"/>
+				<Parameter name="arg_key_prefix" value="-D"/>
+				<Parameter name="arg_key_value_separator" value="="/>
+			</Parameters>
+		</ProcessConfig>
 	</ProcessConfigs>
 	<ProcessServerConfigs>
         <!-- The executionClass specifies the process executor, in this example our Informatica PowerCenter process executor -->

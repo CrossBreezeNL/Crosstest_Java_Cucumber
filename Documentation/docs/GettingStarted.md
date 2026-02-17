@@ -32,10 +32,9 @@ The pom.xml should have the following contents:
   <artifactId>CrossTestRunner</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <properties>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
-	<crosstest.version>1.0.10</crosstest.version>
-	<cucumber.version>4.8.1</cucumber.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+	<crosstest.version>1.0.22</crosstest.version>
   </properties>
   <dependencies>  		
   		<dependency>
