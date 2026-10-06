@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Example config for the PostgreSQL database from the dev container (.devcontainer/docker-compose.yml). -->
+<XTestConfig>
+	<DatabaseConfigs>
+		<DatabaseConfig
+			name="demo"
+			databaseServerConfigName="demoserver"
+		/>
+	</DatabaseConfigs>
+	<DatabaseServerConfigs>
+		<DatabaseServerConfig
+			name="demoserver"
+			JDBCUrl="jdbc:postgresql://localhost:5432/testdb"
+			username="tester"
+			password ="P@$$w0rd"
+		/>
+	</DatabaseServerConfigs>
+</XTestConfig>

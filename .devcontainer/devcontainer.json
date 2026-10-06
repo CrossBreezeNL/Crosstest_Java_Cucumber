@@ -1,7 +1,7 @@
-// Dev container for CrossTest: Java 21 + Maven workspace with a PostgreSQL test database.
+// Dev container for CrossTest: Java 21 + Maven workspace with SQL Server and PostgreSQL test databases.
 // See https://containers.dev/implementors/json_reference/
 {
-	"name": "CrossTest (Java 21 + PostgreSQL)",
+	"name": "CrossTest (Java 21 + SQL Server + PostgreSQL)",
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
@@ -17,10 +17,11 @@
 	},
 
 	// The app container shares the network namespace of the db container,
-	// so PostgreSQL is reachable on localhost:5432 from inside the dev container.
-	"forwardPorts": [5432],
+	// so PostgreSQL (localhost:5432) and SQL Server (localhost:1533) are reachable from inside the dev container.
+	"forwardPorts": [5432, 1533],
 	"portsAttributes": {
-		"5432": { "label": "PostgreSQL", "onAutoForward": "silent" }
+		"5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
+		"1533": { "label": "SQL Server", "onAutoForward": "silent" }
 	},
 
 	// The ~/.m2 volume is created root-owned, so hand it to vscode first; then build and install all modules.

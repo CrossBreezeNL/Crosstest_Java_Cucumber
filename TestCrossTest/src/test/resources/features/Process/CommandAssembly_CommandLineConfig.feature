@@ -1,3 +1,4 @@
+@Windows
 Feature: Command assembly - CommandLineConfig execution tool prefix
   I want to verify that the correct shell tool and flag are used
   based on the CommandLineConfig.

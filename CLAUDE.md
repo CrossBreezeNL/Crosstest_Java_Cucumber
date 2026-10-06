@@ -162,6 +162,15 @@ Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
 
 ## Testing Notes
 
-- PowerCenter tests require a server connection and will fail locally — skip with: `"-Dcucumber.features=classpath:features/Process/CommandAssembly_BasicArgs.feature,..."` targeting specific feature files
-- Run specific tagged tests: `mvn test -f TestCrossTest\pom.xml -Dtest=TestCrossTest "-Dcucumber.filter.tags=@Debug"`
+- PowerCenter is deprecated and `features/_InProgress/` holds unfinished work (tagged `@InProgress`): both are skipped by default via `cucumber.filter.tags=not @PowerCenter and not @InProgress` in `junit-platform.properties`. Run them explicitly with `"-Dcucumber.filter.tags=@PowerCenter"` (needs the PowerCenter server) or `@InProgress`.
+- Run specific tagged tests: `mvn test -f TestCrossTest\pom.xml -Dtest=TestCrossTest "-Dcucumber.filter.tags=@Debug"`. A `-Dcucumber.filter.tags` value **replaces** the default filter, so add `and not @PowerCenter and not @InProgress` when needed.
 - Use `-f TestCrossTest\pom.xml` instead of `cd TestCrossTest` to avoid Windows path issues in bash
+
+### Dev container
+
+`.devcontainer/` provides Java 21 + Maven with two test databases, both reachable on `localhost` from inside the container:
+- **SQL Server 2022** on port `1533` (matches `XTestServerConfig.xml`). The one-shot `mssql-init` service runs `TestCrossTest/testdb.sql` when `TestDB` does not exist yet.
+- **PostgreSQL 17** on port `5432`, initialised from `.devcontainer/postgres-init/`. Used by `@Postgres` features (`pg_source` / `pg_target` database configs).
+- Example runner against PostgreSQL: `CucumberRunner/postgres/runMyFirstCrossTest.sh` (`XTestConfig.xml` is read from the working directory).
+- Teradata (`@Teradata`) scenarios need an external server and `@Windows` scenarios need `cmd.exe` / `powershell.exe`; exclude them in the container with `"-Dcucumber.filter.tags=not @PowerCenter and not @InProgress and not @Teradata and not @Windows"`.
+- `@Negative` scenarios are designed to fail (they verify that CrossTest reports differences/errors), so a full run always reports those as failures. Add `and not @Negative` for a clean pass/fail signal, or run them separately with `@Negative`.

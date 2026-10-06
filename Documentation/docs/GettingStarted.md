@@ -83,7 +83,7 @@ If you are using a different JDBC driver than SQL Server, also update the depend
 	<DatabaseServerConfigs>		
 		<DatabaseServerConfig 
             name="demoserver" 
-            JDBCUrl="jdbc:sqlserver://localhost;instanceName=localDev2017;databaseName=TestDB"				
+            JDBCUrl="jdbc:sqlserver://localhost:1533;databaseName=TestDB;trustServerCertificate=true"				
             username="username" 
             password ="password"            
         />   
