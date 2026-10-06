@@ -1,3 +1,4 @@
+@InProgress
 Feature: Policy Life Cycle Status
 
   Scenario: 1. Functional test of the business rule

@@ -4,6 +4,7 @@ On this wiki you will find all needed documentation to get started with the Java
 
 ## How to get CrossTest
 CrossTest is available as a [Maven package](https://mvnrepository.com/artifact/com.x-breeze.test/CrossTest).
+CrossTest requires Java 17 or newer; it is tested on Java 17, 21 and 25.
 If you are new to Maven, you can find information about it on the [Apache website](https://maven.apache.org/what-is-maven.html).
 When you want to setup a new testing project using CrossTest, follow the instructions on the remainder of this page. 
 
@@ -32,8 +33,7 @@ The pom.xml should have the following contents:
   <artifactId>CrossTestRunner</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
 	<crosstest.version>1.0.22</crosstest.version>
   </properties>
   <dependencies>  		
@@ -58,8 +58,7 @@ The pom.xml should have the following contents:
          <artifactId>maven-compiler-plugin</artifactId>
          <version>3.7.0</version>
          <configuration>
-           <source>1.8</source>
-           <target>1.8</target>
+           <release>17</release>
             <encoding>UTF-8</encoding>          
          </configuration>
        </plugin>                
@@ -83,7 +82,7 @@ If you are using a different JDBC driver than SQL Server, also update the depend
 	<DatabaseServerConfigs>		
 		<DatabaseServerConfig 
             name="demoserver" 
-            JDBCUrl="jdbc:sqlserver://localhost;instanceName=localDev2017;databaseName=TestDB"				
+            JDBCUrl="jdbc:sqlserver://localhost:1533;databaseName=TestDB;trustServerCertificate=true"				
             username="username" 
             password ="password"            
         />   

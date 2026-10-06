@@ -1,0 +1,137 @@
+# Builds all modules and runs the TestCrossTest suite against SQL Server and PostgreSQL,
+# using the same database setup as the dev container (.devcontainer/docker-compose.yml).
+name: Test
+
+on:
+  push:
+    branches: [master, develop, 'features/**', 'hotfix/**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Build and test (Java ${{ matrix.java }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Run every Java version to completion, so one failing version does not hide the others.
+      fail-fast: false
+      matrix:
+        java: ['17', '21', '25']
+
+    env:
+      MSSQL_SA_PASSWORD: CrossTest_Sa1
+      # PowerCenter and Teradata need external servers, @Windows needs cmd.exe / powershell.exe
+      # and @InProgress is unfinished work.
+      CUCUMBER_FILTER_TAGS: not @PowerCenter and not @InProgress and not @Teradata and not @Windows
+
+    services:
+      # Port 1533 matches TestCrossTest/XTestServerConfig.xml.
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_PID: Developer
+          MSSQL_SA_PASSWORD: CrossTest_Sa1
+          MSSQL_TCP_PORT: "1533"
+        ports:
+          - 1533:1533
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -b -S localhost,1533 -U sa -P CrossTest_Sa1 -Q 'SELECT 1'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 30
+          --health-start-period 10s
+
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: tester
+          POSTGRES_PASSWORD: P@$$w0rd
+          POSTGRES_DB: testdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tester -d testdb"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Java ${{ matrix.java }}
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      # Service containers start before checkout, so the init scripts are run with docker exec.
+      - name: Create SQL Server test databases
+        run: |
+          docker cp TestCrossTest/testdb.sql ${{ job.services.mssql.id }}:/tmp/testdb.sql
+          docker exec ${{ job.services.mssql.id }} /opt/mssql-tools18/bin/sqlcmd -C -b \
+            -S localhost,1533 -U sa -P "$MSSQL_SA_PASSWORD" -i /tmp/testdb.sql
+
+      - name: Create PostgreSQL test tables
+        run: |
+          docker exec -i ${{ job.services.postgres.id }} psql -v ON_ERROR_STOP=1 -U tester -d testdb \
+            < .devcontainer/postgres-init/01-testdb.sql
+
+      - name: Build
+        run: mvn -B install -DskipTests
+
+      - name: Run tests
+        run: mvn -B test -f TestCrossTest/pom.xml "-Dcucumber.filter.tags=$CUCUMBER_FILTER_TAGS"
+
+      # Lets the summary job report this version even when the build failed before the tests ran.
+      - name: Record job status
+        if: always()
+        run: |
+          mkdir -p TestCrossTest/target
+          echo "${{ job.status }}" > TestCrossTest/target/job-status.txt
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-java-${{ matrix.java }}
+          path: |
+            TestCrossTest/target/job-status.txt
+            TestCrossTest/target/TestResults.xml
+            TestCrossTest/target/surefire-reports/
+            TestCrossTest/target/cucumber-html-reports/
+          if-no-files-found: ignore
+
+  # Combines the results of all Java versions into one job summary.
+  summary:
+    name: Test summary
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Download test results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: test-results-java-*
+          path: results
+
+      - name: Write test summary
+        run: |
+          args=()
+          for dir in $(ls -d results/test-results-java-* | sort -V); do
+            args+=("Java ${dir##*-}=$dir")
+          done
+          java .github/scripts/TestSummary.java "${args[@]}" >> "$GITHUB_STEP_SUMMARY"

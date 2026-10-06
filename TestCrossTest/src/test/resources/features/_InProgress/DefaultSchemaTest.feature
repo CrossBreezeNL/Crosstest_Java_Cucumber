@@ -1,5 +1,6 @@
 
 #SQLServer does not support setting a default schema per query, so this will not work
+@InProgress
 Feature: Test default database or schema setting
 
   Background: 

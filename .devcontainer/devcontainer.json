@@ -1,0 +1,47 @@
+// Dev container for CrossTest: Java 21 + Maven workspace with SQL Server and PostgreSQL test databases.
+// See https://containers.dev/implementors/json_reference/
+{
+	"name": "CrossTest (Java 21 + SQL Server + PostgreSQL)",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"shutdownAction": "stopCompose",
+
+	"features": {
+		// The java:21 base image already contains the JDK; this feature only adds Maven.
+		"ghcr.io/devcontainers/features/java:1": {
+			"version": "none",
+			"installMaven": "true",
+			"installGradle": "false"
+		}
+	},
+
+	// The app container shares the network namespace of the db container,
+	// so PostgreSQL (localhost:5432) and SQL Server (localhost:1533) are reachable from inside the dev container.
+	"forwardPorts": [5432, 1533],
+	"portsAttributes": {
+		"5432": { "label": "PostgreSQL", "onAutoForward": "silent" },
+		"1533": { "label": "SQL Server", "onAutoForward": "silent" }
+	},
+
+	// The ~/.m2 volume is created root-owned, so hand it to vscode first; then build and install all modules.
+	"postCreateCommand": "sudo chown -R vscode:vscode /home/vscode/.m2 && mvn -B install -DskipTests",
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"vscjava.vscode-java-pack",
+				"CucumberOpen.cucumber-official",
+				"redhat.vscode-xml",
+				"ckolkman.vscode-postgres"
+			],
+			"settings": {
+				"java.configuration.updateBuildConfiguration": "automatic",
+				"cucumber.features": ["TestCrossTest/src/test/resources/features/**/*.feature"],
+				"cucumber.glue": ["TestCrossTest/src/test/java/**/*.java", "CrossTestSteps/src/main/java/**/*.java"]
+			}
+		}
+	},
+
+	"remoteUser": "vscode"
+}

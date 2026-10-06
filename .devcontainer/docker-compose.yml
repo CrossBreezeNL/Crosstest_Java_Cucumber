@@ -1,0 +1,74 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/java:21
+    volumes:
+      - ../..:/workspaces:cached
+      # Persist the Maven repository between container rebuilds.
+      - m2-repo:/home/vscode/.m2
+    # Keep the container running so VS Code can attach to it.
+    command: sleep infinity
+    # Share the db container's network, so PostgreSQL (localhost:5432) and SQL Server (localhost:1533) are available.
+    network_mode: service:db
+    depends_on:
+      db:
+        condition: service_healthy
+      mssql-init:
+        condition: service_completed_successfully
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tester
+      # "$$" is the compose escape for a literal "$", so the actual password is P@$$w0rd.
+      POSTGRES_PASSWORD: P@$$$$w0rd
+      POSTGRES_DB: testdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Scripts in this folder run once, when the data volume is first initialised.
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tester -d testdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # SQL Server for the TestCrossTest suite (replaces the local SQL Server 2017 instance).
+  # Shares the db container's network and listens on port 1533, matching TestCrossTest/XTestServerConfig.xml.
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    network_mode: service:db
+    depends_on:
+      - db
+    environment: &mssql-env
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: CrossTest_Sa1
+      MSSQL_TCP_PORT: "1533"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -b -S localhost,1533 -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -o /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  # One-shot job that creates TestDB, TestOtherDB, TestDB1, TestDB2 and the tester login from TestCrossTest/testdb.sql.
+  mssql-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    network_mode: service:db
+    depends_on:
+      mssql:
+        condition: service_healthy
+    environment: *mssql-env
+    volumes:
+      - ./mssql-init:/init:ro
+      - ../TestCrossTest/testdb.sql:/scripts/testdb.sql:ro
+    entrypoint: ["bash", "/init/init-testdb.sh"]
+
+volumes:
+  m2-repo:
+  postgres-data:
+  mssql-data:

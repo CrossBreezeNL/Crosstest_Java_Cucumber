@@ -8,9 +8,7 @@
 	<version>0.0.1-SNAPSHOT</version>
 
 	<properties>
-		<java.version>1.8</java.version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.release>17</maven.compiler.release>
 		<crosstest.version>1.0.22</crosstest.version>
 		<cucumber.version>7.8.1</cucumber.version>
 		<junit.version>5.9.1</junit.version>
@@ -84,6 +82,12 @@
 			<artifactId>terajdbc4</artifactId>
 			<version>17.0.0.03</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.7.4</version>
+		</dependency>
 
 		<!-- JUnit dependencies. -->
 		<dependency>
@@ -114,8 +118,7 @@
 				<version>3.10.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<release>17</release>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -18,10 +18,18 @@ Feature: Compare the actual with expected results
       | scenario | expectedOutput |
       | No error |            431 |
 
-    @Negative
-    Examples: 
-      | scenario   | expectedOutput |
-      | With error |            432 |
+  @Negative
+  Scenario: Insert data in table and check result With error
+    Given the source table CUST_HUB is empty
+    When I insert the following data in source table CUST_HUB:
+      | CUST_ID | CREATE_DD  |
+      |    1234 | 2019-11-01 |
+      |     431 |            |
+    And I retrieve the contents of the source CUST_HUB table
+    Then I expect the following result to fail with "expected record 2 not found in actual result":
+      | CUST_ID | CREATE_DD  |
+      |    1234 | 2019-11-01 |
+      |     432 |            |
 
   @Positive
   Scenario: Ignore unspecified column in output
@@ -41,7 +49,7 @@ Feature: Compare the actual with expected results
       | CUST_ID | CREATE_DD  |
       |    1234 | 2019-11-01 |
     And I retrieve the contents of the source CUST_HUB table
-    Then I expect the following result:
+    Then I expect the following result to fail with "Invalid column name 'CREATE_D'":
       | CUST_ID | CREATE_D   |
       |    1234 | 2019-11-01 |
 
@@ -70,6 +78,6 @@ Feature: Compare the actual with expected results
       |    1234 | 2019-11-01 |
       |    1234 | 2019-11-01 |
     And I retrieve the contents of the source CUST_HUB table
-    Then I expect the following result:
+    Then I expect the following result to fail with "different number of duplicate rows":
       | CUST_ID | CREATE_DD  |
       |    1234 | 2019-11-01 |

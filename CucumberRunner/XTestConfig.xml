@@ -9,7 +9,7 @@
 	<DatabaseServerConfigs>		
 		<DatabaseServerConfig 
             name="demoserver" 
-            JDBCUrl="jdbc:sqlserver://localhost;instanceName=localDev2017;databaseName=TestDB"				
+            JDBCUrl="jdbc:sqlserver://localhost:1533;databaseName=TestDB;trustServerCertificate=true"				
             username="tester" 
             password ="P@$$w0rd"            
         />   

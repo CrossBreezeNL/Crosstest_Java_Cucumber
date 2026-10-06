@@ -8,10 +8,10 @@ Website: http://x-test.nl
 
 ## Tech Stack
 
-- **Java 8** (source/target 1.8)
+- **Java 17** minimum (`<release>17</release>`), tested on Java 17, 21 and 25
 - **Cucumber 7.8.1** with JUnit 5 (5.9.1)
 - **Maven** multi-module build
-- **CI/CD**: Azure Pipelines
+- **CI/CD**: GitHub Actions
 - **Deployment**: Sonatype / Maven Central
 
 ## Repository Structure
@@ -29,7 +29,6 @@ Website: http://x-test.nl
 ├── TestCrossTest/              Integration tests (feature files + test config)
 ├── Documentation/              MkDocs-based documentation site
 ├── pom.xml                     Parent/aggregator POM
-├── azure-pipelines.yml         CI pipeline (SpotBugs check + package)
 ├── DeployToMaven.cmd           Windows deploy script
 └── MvnDeployOnLinux.sh         Linux deploy script
 ```
@@ -83,7 +82,7 @@ Tests use JUnit 5 Platform Suite (`@Suite` + `@SelectClasspathResource("features
 
 ## Step Definitions
 
-Step definitions support both English and Dutch (NL) Gherkin keywords. They are **generated from a PowerDesigner model** — the Java files in `CrossTestSteps` are generated code and should not be manually edited. The core helper classes in `CrossTest` (e.g., `Process_Helper`, `Result_Helper`) contain the actual logic and are manually maintained.
+Step definitions support both English and Dutch (NL) Gherkin keywords. Gherkin allows one language per feature file, so NL scenarios go in separate `*_NL.feature` files starting with `# language: nl` (Dutch keywords in an English file are read as description text and the scenario silently runs no steps). They are **generated from a PowerDesigner model** — the Java files in `CrossTestSteps` are generated code and should not be manually edited. The core helper classes in `CrossTest` (e.g., `Process_Helper`, `Result_Helper`) contain the actual logic and are manually maintained.
 
 Step definitions cover:
 - **Database context**: transactions, connections
@@ -136,7 +135,7 @@ Optional XML config for non-default shells. Attributes: `tool`, `toolFlags`, `wo
 
 ### Test-only assertion steps
 
-Assertion steps like "the assembled commandline should be" and "the execution tool prefix should be" belong in `TestCrossTest` (class `InternalProcessAssertionSteps`), not in `CrossTestSteps`, since they test internal assembly logic and are not for end users.
+Assertion steps like "the assembled commandline should be" and "the execution tool prefix should be" belong in `TestCrossTest` (classes `InternalProcessAssertionSteps` and `InternalNegativeAssertionSteps`), not in `CrossTestSteps`, since they test internal assembly logic and are not for end users.
 
 ### Documentation
 
@@ -145,7 +144,7 @@ Assertion steps like "the assembled commandline should be" and "the execution to
 
 ## Coding Conventions
 
-- Java 8 compatibility required (no newer Java features)
+- Java 17 compatibility required (no language features or APIs newer than Java 17)
 - Source encoding: UTF-8
 - Package root: `com.xbreeze.xtest`
 - Configuration is XML-based using JAXB unmarshalling
@@ -154,14 +153,21 @@ Assertion steps like "the assembled commandline should be" and "the execution to
 - Step definition files in `CrossTestSteps` are **generated** — do not edit manually
 - Current version: `1.0.22` (defined as `crosstest.version` property in pom.xml files)
 
-## CI Pipeline (Azure Pipelines)
+## CI Pipeline (GitHub Actions)
 
-Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
-1. **Check** - SpotBugs static analysis
-2. **Package** - Maven package
+`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds and runs the TestCrossTest suite on a Java 17, 21 and 25 matrix (Temurin, `fail-fast: false`) excluding `@PowerCenter`, `@InProgress`, `@Teradata` and `@Windows`. Each matrix job uploads its reports and job status as the `test-results-java-<version>` artifact; a final `summary` job combines them with `.github/scripts/TestSummary.java` (run with `java`) into one job summary showing the result per Java version, the failed scenarios and a per-feature table.
 
 ## Testing Notes
 
-- PowerCenter tests require a server connection and will fail locally — skip with: `"-Dcucumber.features=classpath:features/Process/CommandAssembly_BasicArgs.feature,..."` targeting specific feature files
-- Run specific tagged tests: `mvn test -f TestCrossTest\pom.xml -Dtest=TestCrossTest "-Dcucumber.filter.tags=@Debug"`
+- PowerCenter is deprecated and `features/_InProgress/` holds unfinished work (tagged `@InProgress`): both are skipped by default via `cucumber.filter.tags=not @PowerCenter and not @InProgress` in `junit-platform.properties`. Run them explicitly with `"-Dcucumber.filter.tags=@PowerCenter"` (needs the PowerCenter server) or `@InProgress`.
+- Run specific tagged tests: `mvn test -f TestCrossTest\pom.xml -Dtest=TestCrossTest "-Dcucumber.filter.tags=@Debug"`. A `-Dcucumber.filter.tags` value **replaces** the default filter, so add `and not @PowerCenter and not @InProgress` when needed.
 - Use `-f TestCrossTest\pom.xml` instead of `cd TestCrossTest` to avoid Windows path issues in bash
+
+### Dev container
+
+`.devcontainer/` provides Java 21 + Maven with two test databases, both reachable on `localhost` from inside the container:
+- **SQL Server 2022** on port `1533` (matches `XTestServerConfig.xml`). The one-shot `mssql-init` service runs `TestCrossTest/testdb.sql` when `TestDB` does not exist yet.
+- **PostgreSQL 17** on port `5432`, initialised from `.devcontainer/postgres-init/`. Used by `@Postgres` features (`pg_source` / `pg_target` database configs).
+- Example runner against PostgreSQL: `CucumberRunner/postgres/runMyFirstCrossTest.sh` (`XTestConfig.xml` is read from the working directory).
+- Teradata (`@Teradata`) scenarios need an external server and `@Windows` scenarios need `cmd.exe` / `powershell.exe`; exclude them in the container with `"-Dcucumber.filter.tags=not @PowerCenter and not @InProgress and not @Teradata and not @Windows"`.
+- `@Negative` scenarios verify that CrossTest reports differences and errors correctly. They use test-only steps from `InternalNegativeAssertionSteps` (e.g. `I expect the following result to fail with "<message>":`, `I execute the following query on {config} expecting a timeout:`) that pass only when the wrapped action fails with the expected message, so they pass in a normal run.

@@ -26,6 +26,7 @@ Feature: ProcessExecutor - Command line execution
     echo 'This is a single-quoted string'
     """
 
+  @Windows
   Scenario: Run a command with special characters
     When I execute the following command
     """
@@ -48,12 +49,14 @@ Feature: ProcessExecutor - Command line execution
   # Execute command with a specific CommandLineConfig
   # ==========================================================================
 
+  @Windows
   Scenario: Run a command using powershell config
     When I execute the following powershell command:
     """
     echo PowerShell test
     """
 
+  @Windows
   Scenario: Run a command using powershell config - NL
     Wanneer ik het volgende powershell commando uitvoer:
     """
@@ -74,6 +77,7 @@ Feature: ProcessExecutor - Command line execution
     Fast command
     """
 
+  @Windows
   Scenario: Run a slow command with a short timeout - should time out
     When I execute the following short_timeout command expecting a timeout:
     """
