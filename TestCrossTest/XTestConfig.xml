@@ -59,6 +59,29 @@
          		<KeyTable tableName="AB_RH_INS_POLCY" databaseConfigName="dwfr37"/>
       		</KeyTables>
 		</CompositeObject>
+		<!-- Composite objects with reserved word table and key field names, to test quoteObjectNames. -->
+		<CompositeObject name="ReservedWords">
+			<ContextTables>
+				<ContextTable tableName="ORDER" databaseConfigName="source"/>
+			</ContextTables>
+			<KeyFields>
+				<KeyField>CHECK</KeyField>
+			</KeyFields>
+			<KeyTables>
+				<KeyTable tableName="GROUP" databaseConfigName="source"/>
+			</KeyTables>
+		</CompositeObject>
+		<CompositeObject name="PgReservedWords">
+			<ContextTables>
+				<ContextTable tableName="ORDER" databaseConfigName="pg_source"/>
+			</ContextTables>
+			<KeyFields>
+				<KeyField>CHECK</KeyField>
+			</KeyFields>
+			<KeyTables>
+				<KeyTable tableName="GROUP" databaseConfigName="pg_source"/>
+			</KeyTables>
+		</CompositeObject>
 	</CompositeObjects>
 
 	<CredentialProviders>
@@ -227,6 +250,14 @@
 			quoteObjectNames="true"
 		/>
 
+		<!-- Same schema as source, without quoting, to test that reserved word names fail unquoted. -->
+		<DatabaseConfig
+			name="source_unquoted"
+			databaseServerConfigName="test"
+			schema="source"
+			quoteObjectNames="false"
+		/>
+
 	</DatabaseConfigs>
 
 	<DatabaseServerConfigs>		
@@ -235,6 +266,13 @@
 	</DatabaseServerConfigs>
 
 	<ObjectTemplates>
+		<!-- Default value for a reserved word column, to test quoteObjectNames. -->
+		<ObjectTemplate name="reserved_words">
+			<Attributes>
+				<Attribute name="GROUP" value="Default group" />
+			</Attributes>
+		</ObjectTemplate>
+
 		<ObjectTemplate name="datavault">
 			<Attributes>
 				<Attribute name="LOAD_DTS" value="2019-10-29 0:29:41.995992" />

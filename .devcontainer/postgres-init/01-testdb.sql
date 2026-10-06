@@ -73,6 +73,17 @@ CREATE TABLE source."Table with strangé character$" (
 	"Fie#ld with \Strange namë" varchar(100) NULL
 );
 
+-- Tables and columns named with reserved words (in SQL Server, PostgreSQL and Teradata), to test quoteObjectNames.
+CREATE TABLE source."ORDER" (
+	"CHECK" int NOT NULL,
+	"USER" varchar(50) NULL,
+	"GROUP" varchar(50) NULL
+);
+
+CREATE TABLE source."GROUP" (
+	"CHECK" int NOT NULL
+);
+
 CREATE TABLE source."DataTypeTest" (
 	"Test_BigInt" bigint NULL,
 	"Test_Boolean" boolean NULL,
