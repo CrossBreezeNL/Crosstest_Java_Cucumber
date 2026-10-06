@@ -11,7 +11,7 @@ Website: http://x-test.nl
 - **Java 17** minimum (`<release>17</release>`), tested on Java 17, 21 and 25
 - **Cucumber 7.8.1** with JUnit 5 (5.9.1)
 - **Maven** multi-module build
-- **CI/CD**: Azure Pipelines
+- **CI/CD**: GitHub Actions
 - **Deployment**: Sonatype / Maven Central
 
 ## Repository Structure
@@ -29,7 +29,6 @@ Website: http://x-test.nl
 ├── TestCrossTest/              Integration tests (feature files + test config)
 ├── Documentation/              MkDocs-based documentation site
 ├── pom.xml                     Parent/aggregator POM
-├── azure-pipelines.yml         CI pipeline (SpotBugs check + package)
 ├── DeployToMaven.cmd           Windows deploy script
 └── MvnDeployOnLinux.sh         Linux deploy script
 ```
@@ -153,12 +152,6 @@ Assertion steps like "the assembled commandline should be" and "the execution to
 - Step definition classes use Cucumber PicoContainer for dependency injection
 - Step definition files in `CrossTestSteps` are **generated** — do not edit manually
 - Current version: `1.0.22` (defined as `crosstest.version` property in pom.xml files)
-
-## CI Pipeline (Azure Pipelines)
-
-Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
-1. **Check** - SpotBugs static analysis
-2. **Package** - Maven package
 
 ## CI Pipeline (GitHub Actions)
 
