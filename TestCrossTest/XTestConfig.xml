@@ -309,7 +309,6 @@
 		<ObjectTemplate name="source_parentwithsuffix" parent="source_singlesuffix"/>
 		<ObjectTemplate name="source_overwriteparentwithprefix" parent="source_singleprefix" prefix="childprefix_"/>
 		<ObjectTemplate name="source_overwriteparentwithsuffix" parent="source_singlesuffix" suffix="_childsuffix"/>
-		<ObjectTemplate name="source_singlesuffix" suffix="_singlesuffix"/>
 		<ObjectTemplate name="source_parent_addprefix" appendPrefix="parentprefix_"/>
 		<ObjectTemplate name="source_child_addprefix" appendPrefix="childprefix_" parent="source_parent_addprefix"/>
 			

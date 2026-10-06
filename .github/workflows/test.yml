@@ -79,8 +79,9 @@ jobs:
           docker exec -i ${{ job.services.postgres.id }} psql -v ON_ERROR_STOP=1 -U tester -d testdb \
             < .devcontainer/postgres-init/01-testdb.sql
 
-      - name: Build
-        run: mvn -B install -DskipTests
+      # Builds and unit tests all modules; TestCrossTest (the Cucumber suite) runs in the next step with its tag filter.
+      - name: Build and run unit tests
+        run: mvn -B install -pl '!TestCrossTest'
 
       - name: Run tests
         run: mvn -B test -f TestCrossTest/pom.xml "-Dcucumber.filter.tags=$CUCUMBER_FILTER_TAGS"
