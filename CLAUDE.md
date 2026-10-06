@@ -151,7 +151,7 @@ Assertion steps like "the assembled commandline should be" and "the execution to
 - Process executors implement the `ProcessExecutor` interface
 - Step definition classes use Cucumber PicoContainer for dependency injection
 - Step definition files in `CrossTestSteps` are **generated** — do not edit manually
-- Current version: `1.0.22` (defined as `crosstest.version` property in pom.xml files)
+- Current version: `1.1.0` (defined as `crosstest.version` property in pom.xml files)
 
 ## CI Pipeline (GitHub Actions)
 
