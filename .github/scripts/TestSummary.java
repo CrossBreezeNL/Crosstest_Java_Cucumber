@@ -1,4 +1,6 @@
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,15 +14,23 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * Writes a Markdown summary of a Cucumber JUnit XML report (TestCrossTest/target/TestResults.xml),
+ * Writes one Markdown summary for the test runs of several matrix jobs (e.g. one per Java version),
  * for use as a GitHub Actions job summary.
  *
- * Usage: java .github/scripts/TestSummary.java <TestResults.xml> [heading] >> "$GITHUB_STEP_SUMMARY"
+ * Each argument is "label=directory". The directory holds the files the job uploaded:
+ *  - TestResults.xml: the Cucumber JUnit XML report (missing when the tests did not run);
+ *  - job-status.txt:  the GitHub Actions job status (success, failure or cancelled).
+ *
+ * Usage: java .github/scripts/TestSummary.java "Java 17=results/java-17" ... >> "$GITHUB_STEP_SUMMARY"
  */
 public class TestSummary {
 
     /** Maximum number of message lines shown per failed scenario. */
     private static final int MAX_MESSAGE_LINES = 25;
+
+    private static final String PASSED = ":white_check_mark:";
+    private static final String FAILED = ":x:";
+    private static final String SKIPPED = ":fast_forward:";
 
     private static class Counts {
         int passed;
@@ -33,87 +43,171 @@ public class TestSummary {
         }
     }
 
-    private static class Failure {
-        final String feature;
-        final String scenario;
-        final String message;
+    /** The results of one matrix job. */
+    private static class Run {
+        final String label;
+        /** The job status, or null when the job did not record it. */
+        final String jobStatus;
+        /** Whether the job produced a test report. */
+        final boolean hasReport;
+        final Counts totals = new Counts();
+        final Map<String, Counts> features = new LinkedHashMap<>();
+        /** Failure message per "feature\0scenario" key. */
+        final Map<String, String> failures = new LinkedHashMap<>();
 
-        Failure(String feature, String scenario, String message) {
-            this.feature = feature;
-            this.scenario = scenario;
-            this.message = message;
+        Run(String label, String jobStatus, boolean hasReport) {
+            this.label = label;
+            this.jobStatus = jobStatus;
+            this.hasReport = hasReport;
+        }
+
+        boolean passed() {
+            return hasReport && totals.failed == 0 && (jobStatus == null || "success".equals(jobStatus));
         }
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 1 || args.length > 2) {
-            System.err.println("Usage: java TestSummary.java <TestResults.xml> [heading]");
+        if (args.length == 0) {
+            System.err.println("Usage: java TestSummary.java <label=directory>...");
             System.exit(2);
         }
-        File reportFile = new File(args[0]);
-        String heading = args.length == 2 ? args[1] : "Test results";
-        if (!reportFile.isFile()) {
-            System.out.println("## " + heading);
-            System.out.println();
-            System.out.println(":warning: No test report found at `" + args[0] + "`; the tests did not run.");
-            return;
+        List<Run> runs = new ArrayList<>();
+        for (String arg : args) {
+            int separator = arg.indexOf('=');
+            if (separator < 1) {
+                System.err.println("Expected label=directory, got: " + arg);
+                System.exit(2);
+            }
+            runs.add(readRun(arg.substring(0, separator), new File(arg.substring(separator + 1))));
+        }
+        System.out.print(render(runs));
+    }
+
+    private static Run readRun(String label, File directory) throws Exception {
+        File statusFile = new File(directory, "job-status.txt");
+        String jobStatus = statusFile.isFile()
+            ? new String(Files.readAllBytes(statusFile.toPath()), StandardCharsets.UTF_8).trim()
+            : null;
+        File reportFile = new File(directory, "TestResults.xml");
+        Run run = new Run(label, jobStatus, reportFile.isFile());
+        if (!run.hasReport) {
+            return run;
         }
 
         NodeList testCases = DocumentBuilderFactory.newInstance().newDocumentBuilder()
             .parse(reportFile).getElementsByTagName("testcase");
-
-        Counts totals = new Counts();
-        Map<String, Counts> features = new LinkedHashMap<>();
-        List<Failure> failures = new ArrayList<>();
-
         for (int i = 0; i < testCases.getLength(); i++) {
             Element testCase = (Element) testCases.item(i);
             String feature = testCase.getAttribute("classname");
-            Counts featureCounts = features.computeIfAbsent(feature, k -> new Counts());
+            Counts featureCounts = run.features.computeIfAbsent(feature, k -> new Counts());
             double seconds = parseSeconds(testCase.getAttribute("time"));
-            totals.seconds += seconds;
+            run.totals.seconds += seconds;
             featureCounts.seconds += seconds;
 
             Element failure = firstChild(testCase, "failure", "error");
             if (failure != null) {
-                totals.failed++;
+                run.totals.failed++;
                 featureCounts.failed++;
-                failures.add(new Failure(feature, testCase.getAttribute("name"), failureMessage(failure)));
+                run.failures.put(feature + '\0' + testCase.getAttribute("name"), failureMessage(failure));
             } else if (firstChild(testCase, "skipped") != null) {
-                totals.skipped++;
+                run.totals.skipped++;
                 featureCounts.skipped++;
             } else {
-                totals.passed++;
+                run.totals.passed++;
                 featureCounts.passed++;
             }
         }
+        return run;
+    }
 
+    private static String render(List<Run> runs) {
         StringBuilder out = new StringBuilder();
-        out.append("## ").append(heading).append("\n\n");
-        out.append(totals.failed == 0 ? ":white_check_mark: " : ":x: ")
-            .append(String.format(Locale.ROOT, "**%d scenarios: %d passed, %d failed, %d skipped** in %s%n%n",
-                totals.total(), totals.passed, totals.failed, totals.skipped, formatSeconds(totals.seconds)));
+        out.append("## Test results\n\n");
 
-        if (!failures.isEmpty()) {
+        long passedRuns = runs.stream().filter(Run::passed).count();
+        out.append(passedRuns == runs.size()
+            ? String.format(Locale.ROOT, "%s **Passed on all %d versions**%n%n", PASSED, runs.size())
+            : String.format(Locale.ROOT, "%s **Failed on %d of %d versions**%n%n", FAILED, runs.size() - passedRuns, runs.size()));
+
+        // One row per run.
+        out.append("| Version | Result | Scenarios | Passed | Failed | Skipped | Duration |\n");
+        out.append("|:--|:--|--:|--:|--:|--:|--:|\n");
+        for (Run run : runs) {
+            if (!run.hasReport) {
+                out.append(String.format(Locale.ROOT, "| %s | %s %s | | | | | |%n",
+                    escapeTableCell(run.label), FAILED,
+                    run.jobStatus == null ? "No test report" : "No test report (job " + run.jobStatus + ")"));
+                continue;
+            }
+            Counts c = run.totals;
+            String result = run.passed() ? PASSED + " Passed"
+                : c.failed > 0 ? FAILED + " Failed" : FAILED + " Job " + run.jobStatus;
+            out.append(String.format(Locale.ROOT, "| %s | %s | %d | %d | %d | %d | %s |%n",
+                escapeTableCell(run.label), result, c.total(), c.passed, c.failed, c.skipped, formatSeconds(c.seconds)));
+        }
+        out.append('\n');
+
+        // Failed scenarios, each listed once with the versions it failed on.
+        Map<String, List<Run>> failedOn = new LinkedHashMap<>();
+        for (Run run : runs) {
+            for (String key : run.failures.keySet()) {
+                failedOn.computeIfAbsent(key, k -> new ArrayList<>()).add(run);
+            }
+        }
+        if (!failedOn.isEmpty()) {
             out.append("### Failed scenarios\n\n");
-            for (Failure failure : failures) {
-                out.append("<details><summary>:x: <b>").append(escapeHtml(failure.feature)).append("</b> &rsaquo; ")
-                    .append(escapeHtml(failure.scenario)).append("</summary>\n\n");
-                out.append("<pre>").append(escapeHtml(failure.message)).append("</pre>\n</details>\n\n");
+            for (Map.Entry<String, List<Run>> entry : failedOn.entrySet()) {
+                String[] featureAndScenario = entry.getKey().split("\0", 2);
+                List<String> labels = new ArrayList<>();
+                for (Run run : entry.getValue()) {
+                    labels.add(run.label);
+                }
+                Run first = entry.getValue().get(0);
+                out.append("<details><summary>").append(FAILED).append(" <b>").append(escapeHtml(featureAndScenario[0]))
+                    .append("</b> &rsaquo; ").append(escapeHtml(featureAndScenario[1]))
+                    .append(" (").append(escapeHtml(String.join(", ", labels))).append(")</summary>\n\n");
+                out.append("<pre>").append(escapeHtml(first.failures.get(entry.getKey()))).append("</pre>\n</details>\n\n");
             }
         }
 
-        out.append("### Features\n\n");
-        out.append("| | Feature | Passed | Failed | Skipped | Duration |\n");
-        out.append("|:-:|:--|--:|--:|--:|--:|\n");
-        for (Map.Entry<String, Counts> entry : features.entrySet()) {
-            Counts c = entry.getValue();
-            out.append(String.format(Locale.ROOT, "| %s | %s | %d | %d | %d | %s |%n",
-                c.failed > 0 ? ":x:" : (c.passed > 0 ? ":white_check_mark:" : ":fast_forward:"),
-                escapeTableCell(entry.getKey()), c.passed, c.failed, c.skipped, formatSeconds(c.seconds)));
+        // One row per feature, one column per run.
+        Map<String, Boolean> featureNames = new LinkedHashMap<>();
+        for (Run run : runs) {
+            for (String feature : run.features.keySet()) {
+                featureNames.put(feature, Boolean.TRUE);
+            }
         }
+        if (!featureNames.isEmpty()) {
+            out.append("<details><summary><b>Results per feature</b></summary>\n\n");
+            out.append("| Feature |");
+            for (Run run : runs) {
+                out.append(' ').append(escapeTableCell(run.label)).append(" |");
+            }
+            out.append("\n|:--|");
+            for (int i = 0; i < runs.size(); i++) {
+                out.append(":-:|");
+            }
+            out.append('\n');
+            for (String feature : featureNames.keySet()) {
+                out.append("| ").append(escapeTableCell(feature)).append(" |");
+                for (Run run : runs) {
+                    out.append(' ').append(featureCell(run, feature)).append(" |");
+                }
+                out.append('\n');
+            }
+            out.append("\n</details>\n");
+        }
+        return out.toString();
+    }
 
-        System.out.print(out);
+    /** A feature's result for one run: the status icon, followed by passed/total scenarios. */
+    private static String featureCell(Run run, String feature) {
+        Counts c = run.features.get(feature);
+        if (c == null) {
+            return "&ndash;";
+        }
+        String icon = c.failed > 0 ? FAILED : (c.passed > 0 ? PASSED : SKIPPED);
+        return String.format(Locale.ROOT, "%s %d/%d", icon, c.passed, c.total());
     }
 
     private static Element firstChild(Element parent, String... tagNames) {

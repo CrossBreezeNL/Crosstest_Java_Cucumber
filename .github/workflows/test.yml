@@ -85,9 +85,12 @@ jobs:
       - name: Run tests
         run: mvn -B test -f TestCrossTest/pom.xml "-Dcucumber.filter.tags=$CUCUMBER_FILTER_TAGS"
 
-      - name: Write test summary
+      # Lets the summary job report this version even when the build failed before the tests ran.
+      - name: Record job status
         if: always()
-        run: java .github/scripts/TestSummary.java TestCrossTest/target/TestResults.xml "Test results (Java ${{ matrix.java }})" >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          mkdir -p TestCrossTest/target
+          echo "${{ job.status }}" > TestCrossTest/target/job-status.txt
 
       - name: Upload test results
         if: always()
@@ -95,7 +98,40 @@ jobs:
         with:
           name: test-results-java-${{ matrix.java }}
           path: |
+            TestCrossTest/target/job-status.txt
             TestCrossTest/target/TestResults.xml
             TestCrossTest/target/surefire-reports/
             TestCrossTest/target/cucumber-html-reports/
           if-no-files-found: ignore
+
+  # Combines the results of all Java versions into one job summary.
+  summary:
+    name: Test summary
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Download test results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: test-results-java-*
+          path: results
+
+      - name: Write test summary
+        run: |
+          args=()
+          for dir in $(ls -d results/test-results-java-* | sort -V); do
+            args+=("Java ${dir##*-}=$dir")
+          done
+          java .github/scripts/TestSummary.java "${args[@]}" >> "$GITHUB_STEP_SUMMARY"
