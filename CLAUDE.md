@@ -83,7 +83,7 @@ Tests use JUnit 5 Platform Suite (`@Suite` + `@SelectClasspathResource("features
 
 ## Step Definitions
 
-Step definitions support both English and Dutch (NL) Gherkin keywords. They are **generated from a PowerDesigner model** — the Java files in `CrossTestSteps` are generated code and should not be manually edited. The core helper classes in `CrossTest` (e.g., `Process_Helper`, `Result_Helper`) contain the actual logic and are manually maintained.
+Step definitions support both English and Dutch (NL) Gherkin keywords. Gherkin allows one language per feature file, so NL scenarios go in separate `*_NL.feature` files starting with `# language: nl` (Dutch keywords in an English file are read as description text and the scenario silently runs no steps). They are **generated from a PowerDesigner model** — the Java files in `CrossTestSteps` are generated code and should not be manually edited. The core helper classes in `CrossTest` (e.g., `Process_Helper`, `Result_Helper`) contain the actual logic and are manually maintained.
 
 Step definitions cover:
 - **Database context**: transactions, connections
@@ -162,7 +162,7 @@ Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
 
 ## CI Pipeline (GitHub Actions)
 
-`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds with Java 21 and runs the TestCrossTest suite excluding `@PowerCenter`, `@InProgress`, `@Teradata` and `@Windows`. Test reports are uploaded as the `test-results` artifact.
+`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds with Java 21 and runs the TestCrossTest suite excluding `@PowerCenter`, `@InProgress`, `@Teradata` and `@Windows`. A Markdown summary of the Cucumber results (`.github/scripts/TestSummary.java`, run with `java` from `TestResults.xml`) is written to the job summary, and the test reports are uploaded as the `test-results` artifact.
 
 ## Testing Notes
 

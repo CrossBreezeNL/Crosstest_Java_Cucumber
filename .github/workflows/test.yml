@@ -79,6 +79,10 @@ jobs:
       - name: Run tests
         run: mvn -B test -f TestCrossTest/pom.xml "-Dcucumber.filter.tags=$CUCUMBER_FILTER_TAGS"
 
+      - name: Write test summary
+        if: always()
+        run: java .github/scripts/TestSummary.java TestCrossTest/target/TestResults.xml >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
