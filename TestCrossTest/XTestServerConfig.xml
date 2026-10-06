@@ -30,6 +30,13 @@
 				username="dbc" 
 				password ="dbc"
 				 />
+		<!-- PostgreSQL database from the dev container (.devcontainer/docker-compose.yml). -->
+		<DatabaseServerConfig
+				name="postgres"
+				JDBCUrl="jdbc:postgresql://localhost:5432/testdb"
+				username="tester"
+				password ="P@$$w0rd"
+				 />
 	</DatabaseServerConfigs>
 	<ProcessServerConfigs>
 		<ProcessServerConfig 

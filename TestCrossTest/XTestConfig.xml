@@ -211,7 +211,21 @@
 			name="sys" 
 			databaseServerConfigName="test"			
 			schema="sys"
-		/>	
+		/>
+
+		<DatabaseConfig
+			name="pg_source"
+			databaseServerConfigName="postgres"
+			schema="source"
+			quoteObjectNames="true"
+		/>
+
+		<DatabaseConfig
+			name="pg_target"
+			databaseServerConfigName="postgres"
+			schema="target"
+			quoteObjectNames="true"
+		/>
 
 	</DatabaseConfigs>
 

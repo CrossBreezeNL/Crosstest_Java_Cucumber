@@ -1,0 +1,35 @@
+services:
+  app:
+    image: mcr.microsoft.com/devcontainers/java:21
+    volumes:
+      - ../..:/workspaces:cached
+      # Persist the Maven repository between container rebuilds.
+      - m2-repo:/home/vscode/.m2
+    # Keep the container running so VS Code can attach to it.
+    command: sleep infinity
+    # Share the db container's network, so PostgreSQL is available on localhost:5432.
+    network_mode: service:db
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tester
+      # "$$" is the compose escape for a literal "$", so the actual password is P@$$w0rd.
+      POSTGRES_PASSWORD: P@$$$$w0rd
+      POSTGRES_DB: testdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # Scripts in this folder run once, when the data volume is first initialised.
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tester -d testdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  m2-repo:
+  postgres-data:
