@@ -8,7 +8,7 @@ Website: http://x-test.nl
 
 ## Tech Stack
 
-- **Java 8** (source/target 1.8)
+- **Java 17** minimum (`<release>17</release>`), tested on Java 17, 21 and 25
 - **Cucumber 7.8.1** with JUnit 5 (5.9.1)
 - **Maven** multi-module build
 - **CI/CD**: Azure Pipelines
@@ -145,7 +145,7 @@ Assertion steps like "the assembled commandline should be" and "the execution to
 
 ## Coding Conventions
 
-- Java 8 compatibility required (no newer Java features)
+- Java 17 compatibility required (no language features or APIs newer than Java 17)
 - Source encoding: UTF-8
 - Package root: `com.xbreeze.xtest`
 - Configuration is XML-based using JAXB unmarshalling
