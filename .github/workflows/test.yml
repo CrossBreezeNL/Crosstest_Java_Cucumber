@@ -15,9 +15,9 @@ jobs:
 
     env:
       MSSQL_SA_PASSWORD: CrossTest_Sa1
-      # PowerCenter and Teradata need external servers, @Windows needs cmd.exe / powershell.exe,
-      # @InProgress is unfinished work and @Negative scenarios are designed to fail.
-      CUCUMBER_FILTER_TAGS: not @PowerCenter and not @InProgress and not @Teradata and not @Windows and not @Negative
+      # PowerCenter and Teradata need external servers, @Windows needs cmd.exe / powershell.exe
+      # and @InProgress is unfinished work.
+      CUCUMBER_FILTER_TAGS: not @PowerCenter and not @InProgress and not @Teradata and not @Windows
 
     services:
       # Port 1533 matches TestCrossTest/XTestServerConfig.xml.

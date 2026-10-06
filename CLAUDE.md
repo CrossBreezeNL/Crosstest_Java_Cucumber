@@ -136,7 +136,7 @@ Optional XML config for non-default shells. Attributes: `tool`, `toolFlags`, `wo
 
 ### Test-only assertion steps
 
-Assertion steps like "the assembled commandline should be" and "the execution tool prefix should be" belong in `TestCrossTest` (class `InternalProcessAssertionSteps`), not in `CrossTestSteps`, since they test internal assembly logic and are not for end users.
+Assertion steps like "the assembled commandline should be" and "the execution tool prefix should be" belong in `TestCrossTest` (classes `InternalProcessAssertionSteps` and `InternalNegativeAssertionSteps`), not in `CrossTestSteps`, since they test internal assembly logic and are not for end users.
 
 ### Documentation
 
@@ -162,7 +162,7 @@ Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
 
 ## CI Pipeline (GitHub Actions)
 
-`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds with Java 21 and runs the TestCrossTest suite excluding `@PowerCenter`, `@InProgress`, `@Teradata`, `@Windows` and `@Negative`. Test reports are uploaded as the `test-results` artifact.
+`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds with Java 21 and runs the TestCrossTest suite excluding `@PowerCenter`, `@InProgress`, `@Teradata` and `@Windows`. Test reports are uploaded as the `test-results` artifact.
 
 ## Testing Notes
 
@@ -177,4 +177,4 @@ Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
 - **PostgreSQL 17** on port `5432`, initialised from `.devcontainer/postgres-init/`. Used by `@Postgres` features (`pg_source` / `pg_target` database configs).
 - Example runner against PostgreSQL: `CucumberRunner/postgres/runMyFirstCrossTest.sh` (`XTestConfig.xml` is read from the working directory).
 - Teradata (`@Teradata`) scenarios need an external server and `@Windows` scenarios need `cmd.exe` / `powershell.exe`; exclude them in the container with `"-Dcucumber.filter.tags=not @PowerCenter and not @InProgress and not @Teradata and not @Windows"`.
-- `@Negative` scenarios are designed to fail (they verify that CrossTest reports differences/errors), so a full run always reports those as failures. Add `and not @Negative` for a clean pass/fail signal, or run them separately with `@Negative`.
+- `@Negative` scenarios verify that CrossTest reports differences and errors correctly. They use test-only steps from `InternalNegativeAssertionSteps` (e.g. `I expect the following result to fail with "<message>":`, `I execute the following query on {config} expecting a timeout:`) that pass only when the wrapped action fails with the expected message, so they pass in a normal run.

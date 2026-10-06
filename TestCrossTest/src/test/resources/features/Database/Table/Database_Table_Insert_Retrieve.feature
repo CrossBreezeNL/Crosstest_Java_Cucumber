@@ -37,7 +37,7 @@ Feature: Write to and retrieve from database tables
       | CUST_ID | CREATE_DD |
       |     431 |           |
     And I retrieve the contents of the source CUST_HUB table
-    Then I expect the following result:
+    Then I expect the following result to fail with "Expected 0 unique records but found 1 unique records":
       | CUST_ID | CREATE_DD |
 
   # Note that for this scenario to succeed, when editing in Eclipse the Eclipse file encoding needs to be UTF-8
@@ -87,7 +87,7 @@ Feature: Write to and retrieve from database tables
       | Test_BigDecimal |
       | <Value>         |
     And I retrieve the contents of the source DataTypeTest table
-    Then I expect the following result:
+    Then I expect the following result to fail with "expected record 1 not found in actual result":
       | Test_BigDecimal |
       | <OutValue>      |
 
@@ -103,7 +103,7 @@ Feature: Write to and retrieve from database tables
       | Test_Char |
       | Input     |
     And I retrieve the contents of the source DataTypeTest table
-    Then I expect the following result:
+    Then I expect the following result to fail with "expected record 1 not found in actual result":
       | Test_Char |
       | Output    |
 
@@ -114,7 +114,7 @@ Feature: Write to and retrieve from database tables
       | Customer_ID | Customer_Name | Country | IsActive |
       |           1 | Smith         |         |        1 |
     And I retrieve the contents of the source Customer table
-    Then I expect the following result:
+    Then I expect the following result to fail with "expected record 1 not found in actual result":
       | Customer_ID | Customer_Name | Country | IsActive |
       |           1 |               | Smith   |        1 |
 

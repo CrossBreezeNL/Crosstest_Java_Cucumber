@@ -95,12 +95,12 @@ Feature: Execute a query or statement on a database
       SELECT 1 as firstField      
 
       """
-    Then I expect the following result:
+    Then I expect the following result to fail with "Expected 0 unique records but found 1 unique records":
       | firstField |
 
   @Negative
   Scenario: Test the command timeout
-    When I execute the following query on timeout_source:
+    When I execute the following query on timeout_source expecting a timeout:
       """
       WAITFOR DELAY '00:00:05'
       SELECT *
