@@ -15,7 +15,7 @@ import org.w3c.dom.NodeList;
  * Writes a Markdown summary of a Cucumber JUnit XML report (TestCrossTest/target/TestResults.xml),
  * for use as a GitHub Actions job summary.
  *
- * Usage: java .github/scripts/TestSummary.java <TestResults.xml> >> "$GITHUB_STEP_SUMMARY"
+ * Usage: java .github/scripts/TestSummary.java <TestResults.xml> [heading] >> "$GITHUB_STEP_SUMMARY"
  */
 public class TestSummary {
 
@@ -46,13 +46,14 @@ public class TestSummary {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            System.err.println("Usage: java TestSummary.java <TestResults.xml>");
+        if (args.length < 1 || args.length > 2) {
+            System.err.println("Usage: java TestSummary.java <TestResults.xml> [heading]");
             System.exit(2);
         }
         File reportFile = new File(args[0]);
+        String heading = args.length == 2 ? args[1] : "Test results";
         if (!reportFile.isFile()) {
-            System.out.println("## Test results");
+            System.out.println("## " + heading);
             System.out.println();
             System.out.println(":warning: No test report found at `" + args[0] + "`; the tests did not run.");
             return;
@@ -88,7 +89,7 @@ public class TestSummary {
         }
 
         StringBuilder out = new StringBuilder();
-        out.append("## Test results\n\n");
+        out.append("## ").append(heading).append("\n\n");
         out.append(totals.failed == 0 ? ":white_check_mark: " : ":x: ")
             .append(String.format(Locale.ROOT, "**%d scenarios: %d passed, %d failed, %d skipped** in %s%n%n",
                 totals.total(), totals.passed, totals.failed, totals.skipped, formatSeconds(totals.seconds)));

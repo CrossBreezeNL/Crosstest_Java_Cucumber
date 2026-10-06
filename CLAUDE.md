@@ -162,7 +162,7 @@ Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
 
 ## CI Pipeline (GitHub Actions)
 
-`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds with Java 21 and runs the TestCrossTest suite excluding `@PowerCenter`, `@InProgress`, `@Teradata` and `@Windows`. A Markdown summary of the Cucumber results (`.github/scripts/TestSummary.java`, run with `java` from `TestResults.xml`) is written to the job summary, and the test reports are uploaded as the `test-results` artifact.
+`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds and runs the TestCrossTest suite on a Java 17, 21 and 25 matrix (Temurin, `fail-fast: false`) excluding `@PowerCenter`, `@InProgress`, `@Teradata` and `@Windows`. A Markdown summary of the Cucumber results (`.github/scripts/TestSummary.java`, run with `java` from `TestResults.xml`) is written to the job summary per Java version, and the test reports are uploaded as the `test-results-java-<version>` artifacts.
 
 ## Testing Notes
 
