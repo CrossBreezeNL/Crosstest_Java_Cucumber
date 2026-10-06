@@ -67,7 +67,7 @@ DeployToMaven.cmd
 
 ## Test Runner
 
-Tests use JUnit Platform Suite (`@Suite` + `@SelectClasspathResource("features")`). The Cucumber glue package is `com.xbreeze.xtest`. Test results output to `target/TestResults.xml` and the Cucumber HTML report in `target/cucumber-report.html`.
+Tests use JUnit Platform Suite (`@Suite` + `@SelectPackages("features")`). The Cucumber glue package is `com.xbreeze.xtest`. Test results output to `target/TestResults.xml` and the Cucumber HTML report in `target/cucumber-report.html`.
 
 ## Key Packages
 
