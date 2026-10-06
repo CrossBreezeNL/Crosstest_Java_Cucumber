@@ -160,6 +160,10 @@ Two stages on `master`, `develop`, `features/*`, `hotfix/*` branches:
 1. **Check** - SpotBugs static analysis
 2. **Package** - Maven package
 
+## CI Pipeline (GitHub Actions)
+
+`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds with Java 21 and runs the TestCrossTest suite excluding `@PowerCenter`, `@InProgress`, `@Teradata`, `@Windows` and `@Negative`. Test reports are uploaded as the `test-results` artifact.
+
 ## Testing Notes
 
 - PowerCenter is deprecated and `features/_InProgress/` holds unfinished work (tagged `@InProgress`): both are skipped by default via `cucumber.filter.tags=not @PowerCenter and not @InProgress` in `junit-platform.properties`. Run them explicitly with `"-Dcucumber.filter.tags=@PowerCenter"` (needs the PowerCenter server) or `@InProgress`.
