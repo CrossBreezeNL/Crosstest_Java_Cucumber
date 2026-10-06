@@ -9,7 +9,7 @@ Website: http://x-test.nl
 ## Tech Stack
 
 - **Java 17** minimum (`<release>17</release>`), tested on Java 17, 21 and 25
-- **Cucumber 7.8.1** with JUnit 5 (5.9.1)
+- **Cucumber 8.0.4** with JUnit 6 (6.1.3) on the JUnit Platform
 - **Maven** multi-module build
 - **CI/CD**: GitHub Actions
 - **Deployment**: Sonatype / Maven Central
@@ -67,7 +67,7 @@ DeployToMaven.cmd
 
 ## Test Runner
 
-Tests use JUnit 5 Platform Suite (`@Suite` + `@SelectClasspathResource("features")`). The Cucumber glue package is `com.xbreeze.xtest`. Test results output to `target/TestResults.xml` and HTML reports in `target/cucumber-html-reports/`.
+Tests use JUnit Platform Suite (`@Suite` + `@SelectClasspathResource("features")`). The Cucumber glue package is `com.xbreeze.xtest`. Test results output to `target/TestResults.xml` and the Cucumber HTML report in `target/cucumber-report.html`.
 
 ## Key Packages
 

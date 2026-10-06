@@ -101,7 +101,7 @@ jobs:
             TestCrossTest/target/job-status.txt
             TestCrossTest/target/TestResults.xml
             TestCrossTest/target/surefire-reports/
-            TestCrossTest/target/cucumber-html-reports/
+            TestCrossTest/target/cucumber-report.html
           if-no-files-found: ignore
 
   # Combines the results of all Java versions into one job summary.

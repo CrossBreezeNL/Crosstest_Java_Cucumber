@@ -10,8 +10,8 @@
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
 		<crosstest.version>1.0.22</crosstest.version>
-		<cucumber.version>7.8.1</cucumber.version>
-		<junit.version>5.9.1</junit.version>
+		<cucumber.version>8.0.4</cucumber.version>
+		<junit.version>6.1.3</junit.version>
 	</properties>
 
 	<dependencyManagement>
@@ -55,7 +55,7 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-simple</artifactId>
-			<version>1.7.36</version>
+			<version>2.0.20</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -74,19 +74,19 @@
 		<dependency>
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>mssql-jdbc</artifactId>
-			<version>7.4.1.jre8</version>
+			<version>13.6.0.jre11</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.teradata.jdbc/terajdbc4 -->
+		<!-- https://mvnrepository.com/artifact/com.teradata.jdbc/terajdbc -->
 		<dependency>
 			<groupId>com.teradata.jdbc</groupId>
-			<artifactId>terajdbc4</artifactId>
-			<version>17.0.0.03</version>
+			<artifactId>terajdbc</artifactId>
+			<version>20.00.00.60</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.4</version>
+			<version>42.7.13</version>
 		</dependency>
 
 		<!-- JUnit dependencies. -->
@@ -103,11 +103,6 @@
 
 		<!-- We use the cucumber reporting plugin to generate a nice report. We 
 			use version 3, since 4 is not compatible with cucumber 4.* -->
-		<dependency>
-			<groupId>me.jvt.cucumber</groupId>
-			<artifactId>reporting-plugin</artifactId>
-			<version>7.3.0</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -115,7 +110,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.16.0</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<release>17</release>
@@ -124,7 +119,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M7</version>
+				<version>3.6.0</version>
 			</plugin>
 		</plugins>
 	</build>

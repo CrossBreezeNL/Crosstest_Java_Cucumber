@@ -76,10 +76,11 @@ The configuration can be [splitted in multiple files](./config_include.md)
 	</DatabaseConfigs>
 	<DatabaseServerConfigs>
         <!-- The JDBC driver used should be available on the class path and is loaded at runtime -->
+        <!-- SQL Server JDBC driver 10 and newer encrypts connections by default; trustServerCertificate=true accepts a self-signed server certificate (f.e. a local development server) -->
 		<!-- With the setSchemaTemplate attribute a template can be set for a SQL statement used to set the current schema or database. {SCHEMA} will be replaced by the schema attribute from the database config -->
 		<DatabaseServerConfig 
 			name="test" 
-			JDBCUrl="jdbc:sqlserver://localhost:1436;databaseName=TestDB" 
+			JDBCUrl="jdbc:sqlserver://localhost:1436;databaseName=TestDB;trustServerCertificate=true" 
 			username="USERNAME" 
 			password ="PASSWORD"
 			setSchemaTemplate="DATABASE {SCHEMA};"
