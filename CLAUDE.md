@@ -148,10 +148,11 @@ Assertion steps like "the assembled commandline should be" and "the execution to
 - Source encoding: UTF-8
 - Package root: `com.xbreeze.xtest`
 - Configuration is XML-based using JAXB unmarshalling
+- Config names must be unique per config type (`XTestConfig.validateUniqueNames`, run at load); lookups such as `getDatabaseConfig` return the first match and are case-insensitive, except composite objects
 - Process executors implement the `ProcessExecutor` interface
 - Step definition classes use Cucumber PicoContainer for dependency injection
 - Step definition files in `CrossTestSteps` are **generated** — do not edit manually
-- Current version: `1.0.22` (defined as `crosstest.version` property in pom.xml files)
+- Current version: `1.1.0` (defined as `crosstest.version` property in pom.xml files)
 
 ## CI Pipeline (GitHub Actions)
 
@@ -159,6 +160,7 @@ Assertion steps like "the assembled commandline should be" and "the execution to
 
 ## Testing Notes
 
+- Plain JUnit 5 unit tests live in the module they test (e.g. `CrossTest/src/test/java`); `mvn install -pl '!TestCrossTest'` builds and runs them without the Cucumber suite.
 - PowerCenter is deprecated and `features/_InProgress/` holds unfinished work (tagged `@InProgress`): both are skipped by default via `cucumber.filter.tags=not @PowerCenter and not @InProgress` in `junit-platform.properties`. Run them explicitly with `"-Dcucumber.filter.tags=@PowerCenter"` (needs the PowerCenter server) or `@InProgress`.
 - Run specific tagged tests: `mvn test -f TestCrossTest\pom.xml -Dtest=TestCrossTest "-Dcucumber.filter.tags=@Debug"`. A `-Dcucumber.filter.tags` value **replaces** the default filter, so add `and not @PowerCenter and not @InProgress` when needed.
 - Use `-f TestCrossTest\pom.xml` instead of `cd TestCrossTest` to avoid Windows path issues in bash

@@ -2,10 +2,12 @@ package com.xbreeze.xtest.test;
 
 import com.xbreeze.xtest.exception.XTestDatabaseException;
 import com.xbreeze.xtest.exception.XTestException;
+import com.xbreeze.xtest.modules.data.database.dbtable.DbTable_Helper;
 import com.xbreeze.xtest.modules.data.database.query.Query_Helper;
 import com.xbreeze.xtest.modules.result.Result_Helper;
 
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
@@ -19,10 +21,25 @@ public class InternalNegativeAssertionSteps {
 
     private Result_Helper _Result_helper;
     private Query_Helper _Query_helper;
+    private DbTable_Helper _DbTable_helper;
 
-    public InternalNegativeAssertionSteps(Result_Helper Result_helper, Query_Helper Query_helper) {
+    public InternalNegativeAssertionSteps(Result_Helper Result_helper, Query_Helper Query_helper, DbTable_Helper DbTable_helper) {
         _Result_helper = Result_helper;
         _Query_helper = Query_helper;
+        _DbTable_helper = DbTable_helper;
+    }
+
+    @Given("^emptying the ([a-zA-Z0-9_@$#-]+) table (.+) should fail with \"(.*)\"$")
+    public void Given_EN_DeleteTemplatedTableDataExpectingFailure(String databaseConfigName, String tableName, String expectedMessage) throws Throwable {
+        try {
+            _DbTable_helper.DeleteTemplatedTableData(databaseConfigName, tableName);
+        } catch (XTestException e) {
+            assertMessageContains(e, expectedMessage);
+            return;
+        }
+        throw new AssertionError(String.format(
+            "Expected emptying table %s to fail with '%s', but it succeeded.", tableName, expectedMessage
+        ));
     }
 
     @Then("^I expect the following result to fail with \"(.*)\":$")

@@ -5,6 +5,8 @@ The configuration should be stored in a file called XTestConfig.xml that is in t
 See the [schema file of the config](./CrossTestConfig.xsd)
 The configuration can be [splitted in multiple files](./config_include.md)
 
+Names must be unique within each type of configuration (DatabaseConfig, DatabaseServerConfig, ObjectTemplate, ProcessConfig, etc.), also across included files. Names are not case sensitive, except for CompositeObject names. Since version 1.1.0 CrossTest reports an error when the configuration contains a duplicate name; before, the first configuration with the name was used and the others were ignored without notice.
+
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Set debug="true" for console debugging output-->
@@ -65,7 +67,7 @@ The configuration can be [splitted in multiple files](./config_include.md)
 	</CredentialProviders>
 	<DatabaseConfigs>	
 		<!-- the command timeout is in seconds and specifieds how long CrossTest waits for a command to finish. if not specified CrossTest uses the JDBC  --> <!-- settings if any or waits indefinitely-->	
-		<!-- if quoteObjectNames is set to true (default is no) alle table and column names are enclosed in double quotes, except for those in executing sql --> <!-- queries or statements, since these can be typed using quotes where desired-->
+		<!-- if quoteObjectNames is set to true (default is no) all table and column names are enclosed in double quotes (needed for names with special characters or reserved words), except for those in executing sql --> <!-- queries or statements, since these can be typed using quotes where desired-->
 		<DatabaseConfig 
 			name="demo" 
 			databaseServerConfigName="test"		
