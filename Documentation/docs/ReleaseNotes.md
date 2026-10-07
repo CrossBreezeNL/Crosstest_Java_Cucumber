@@ -19,6 +19,18 @@ Here you can find the release notes of all Java CrossTest releases up till the r
 [//]: # (>     * [ ] Binding)
 [//]: # (>         * [X] Some issue...)
 
+## Version 1.1
+- [ ] 1.1.0
+> New release
+> !!! warning "Breaking changes"
+>     * [ ] Java
+>         - [X] Java 17 is now the minimum supported Java version (tested on Java 17, 21 and 25)
+>     * [ ] Config
+>         - [X] A duplicate name within a type of configuration (f.e. two DatabaseConfigs with the same name) is now reported as an error when the config is loaded. Before, the first configuration with the name was used and the others were ignored without notice
+> !!! "Enhanced features"
+>     * [ ] Config
+>         - [X] Tests and documentation for quoteObjectNames with table and column names that are reserved words
+
 ## Version 1.0
 - [ ] 1.0.22 <sup>12-02-2026</sup>
 > New release

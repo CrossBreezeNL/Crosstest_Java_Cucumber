@@ -34,7 +34,7 @@ The pom.xml should have the following contents:
   <version>0.0.1-SNAPSHOT</version>
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
-	<crosstest.version>1.0.22</crosstest.version>
+	<crosstest.version>1.1.0</crosstest.version>
   </properties>
   <dependencies>  		
   		<dependency>

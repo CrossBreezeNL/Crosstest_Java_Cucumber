@@ -9,7 +9,7 @@
 
 	<properties>
 		<maven.compiler.release>17</maven.compiler.release>
-		<crosstest.version>1.0.22</crosstest.version>
+		<crosstest.version>1.1.0</crosstest.version>
 		<cucumber.version>7.8.1</cucumber.version>
 		<junit.version>5.9.1</junit.version>
 	</properties>

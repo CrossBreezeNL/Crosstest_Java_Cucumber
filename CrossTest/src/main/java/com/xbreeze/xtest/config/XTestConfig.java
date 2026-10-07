@@ -35,6 +35,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.function.Function;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.parsers.ParserConfigurationException;
@@ -187,6 +192,9 @@ public class XTestConfig {
 			
 			//TODO how to package signed jars?
 		
+			//Config lookups return the first config with a matching name, so a duplicate name would silently be ignored.
+			cfg.validateUniqueNames();
+
 			//Assign all object template configs their parent
 			for(ObjectTemplateConfig oConfig:cfg._objectTemplates) {
 				oConfig.setParentTemplateConfig(cfg);
@@ -361,6 +369,41 @@ public class XTestConfig {
 		return configSchema;
 	}
 	
+	/**
+	 * Checks that the names within each type of config are unique. The config lookups (f.e. getDatabaseConfig)
+	 * return the first config with a matching name, so a later config with the same name would be ignored without notice.
+	 * Names are compared the same way as in the lookups: case-insensitive, except for composite objects.
+	 * @throws XTestException when a name is used more than once for the same type of config.
+	 */
+	void validateUniqueNames() throws XTestException {
+		validateUniqueNames("CommandLineConfig", _commandLineConfigs, CommandLineConfig::getName, true);
+		validateUniqueNames("DatabaseConfig", _databaseConfigs, DatabaseConfig::getName, true);
+		validateUniqueNames("DatabaseServerConfig", _databaseServerConfigs, DatabaseServerConfig::getName, true);
+		validateUniqueNames("ProcessConfig", _processConfigs, ProcessConfig::getName, true);
+		validateUniqueNames("ProcessServerConfig", _processServerConfigs, ProcessServerConfig::getName, true);
+		validateUniqueNames("CompositeObject", _compositeObjects, CompositeObjectConfig::getName, false);
+		validateUniqueNames("ObjectTemplate", _objectTemplates, ObjectTemplateConfig::getName, true);
+		validateUniqueNames("CredentialProvider", _credentialProviders, CredentialProviderConfig::getName, true);
+	}
+
+	private static <T> void validateUniqueNames(String configType, List<T> configs, Function<T, String> getName, boolean ignoreCase) throws XTestException {
+		if (configs == null) {
+			return;
+		}
+		Set<String> names = new HashSet<>();
+		for (T config : configs) {
+			String name = getName.apply(config);
+			if (name == null) {
+				continue;
+			}
+			if (!names.add(ignoreCase ? name.toLowerCase(Locale.ROOT) : name)) {
+				throw new XTestException(String.format(
+					"The CrossTest config contains more than one %s named '%s'%s. Each %s name must be unique.",
+					configType, name, ignoreCase ? " (names are not case sensitive)" : "", configType));
+			}
+		}
+	}
+
 	public DatabaseConfig getDatabaseConfig(String configName) throws XTestDatabaseException {
 		for (DatabaseConfig dbc:_databaseConfigs) {
 			if (dbc.getName().equalsIgnoreCase(configName))

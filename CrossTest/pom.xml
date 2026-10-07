@@ -28,7 +28,7 @@
 	<artifactId>CrossTestCore</artifactId>
 
 	<properties>
-		<crosstest.version>1.0.22</crosstest.version>
+		<crosstest.version>1.1.0</crosstest.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<cucumber.version>7.8.1</cucumber.version>
 	</properties>
@@ -105,6 +105,12 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
 			<version>5.9.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.9.1</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
 		<dependency>
