@@ -98,6 +98,7 @@
 						<!-- build jar file with sources (Sonatype requirement) -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
+						<version>3.4.0</version>
 						<executions>
 							<execution>
 								<id>attach-sources</id>
@@ -111,6 +112,7 @@
 						<!-- Build jar file with javadocs (Sonatype requirement) -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>3.12.0</version>
 						<configuration>
 							<show>protected</show>
 							<failOnError>false</failOnError>
@@ -129,7 +131,7 @@
 						<!-- Sign artifacts with gpg (Sonatype requirement) -->
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>3.0.1</version>
+						<version>3.2.8</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -143,7 +145,7 @@
 					<plugin>
 						<groupId>org.sonatype.central</groupId>
 						<artifactId>central-publishing-maven-plugin</artifactId>
-						<version>0.9.0</version>
+						<version>0.11.0</version>
 						<extensions>true</extensions>
 						<configuration>
 							<publishingServerId>central</publishingServerId>
@@ -159,13 +161,13 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.10.1</version>
+				<version>3.16.0</version>
 				<configuration>
 					<release>17</release>
 				</configuration>
 			</plugin>
 			<!-- WO: Disabled for now <plugin> <groupId>com.github.spotbugs</groupId> 
-				<artifactId>spotbugs-maven-plugin</artifactId> <version>4.0.0</version> <executions> 
+				<artifactId>spotbugs-maven-plugin</artifactId> <version>4.10.4.1</version> <executions> 
 				<execution> <goals> <goal>check</goal> </goals> </execution> </executions> 
 				</plugin> -->
 		</plugins>
@@ -176,7 +178,7 @@
 			<plugin>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
-				<version>4.7.2.1</version>
+				<version>4.10.4.1</version>
 			</plugin>
 		</plugins>
 	</reporting>

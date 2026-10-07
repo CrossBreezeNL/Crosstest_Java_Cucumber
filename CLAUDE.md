@@ -9,7 +9,7 @@ Website: http://x-test.nl
 ## Tech Stack
 
 - **Java 17** minimum (`<release>17</release>`), tested on Java 17, 21 and 25
-- **Cucumber 7.8.1** with JUnit 5 (5.9.1)
+- **Cucumber 8.0.4** with JUnit 6 (6.1.3) on the JUnit Platform
 - **Maven** multi-module build
 - **CI/CD**: GitHub Actions
 - **Deployment**: Sonatype / Maven Central
@@ -67,7 +67,7 @@ DeployToMaven.cmd
 
 ## Test Runner
 
-Tests use JUnit 5 Platform Suite (`@Suite` + `@SelectClasspathResource("features")`). The Cucumber glue package is `com.xbreeze.xtest`. Test results output to `target/TestResults.xml` and HTML reports in `target/cucumber-html-reports/`.
+Tests use JUnit Platform Suite (`@Suite` + `@SelectPackages("features")`). The Cucumber glue package is `com.xbreeze.xtest`. Test results output to `target/TestResults.xml` and the Cucumber HTML report in `target/cucumber-report.html`.
 
 ## Key Packages
 
@@ -156,7 +156,7 @@ Assertion steps like "the assembled commandline should be" and "the execution to
 
 ## CI Pipeline (GitHub Actions)
 
-`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds and runs the TestCrossTest suite on a Java 17, 21 and 25 matrix (Temurin, `fail-fast: false`) excluding `@PowerCenter`, `@InProgress`, `@Teradata` and `@Windows`. Each matrix job uploads its reports and job status as the `test-results-java-<version>` artifact; a final `summary` job combines them with `.github/scripts/TestSummary.java` (run with `java`) into one job summary showing the result per Java version, the failed scenarios and a per-feature table.
+`.github/workflows/test.yml` runs on pushes to `master`, `develop`, `features/**`, `hotfix/**`, on pull requests and manually. It starts SQL Server 2022 (port `1533`) and PostgreSQL 17 as service containers, initialises them from `TestCrossTest/testdb.sql` and `.devcontainer/postgres-init/01-testdb.sql`, builds and runs the TestCrossTest suite on a Java 17, 21 and 25 matrix (Temurin, `fail-fast: false`) excluding `@PowerCenter`, `@InProgress`, `@Teradata` and `@Windows`. Each matrix job uploads its reports and job status as the `test-results-java-<version>` artifact, and the Java 17 job uploads the library jars as the `crosstest-jars` artifact when the build and tests pass; a final `summary` job combines them with `.github/scripts/TestSummary.java` (run with `java`) into one job summary showing the result per Java version, the failed scenarios and a per-feature table.
 
 ## Testing Notes
 

@@ -2,25 +2,25 @@
 	<DatabaseServerConfigs>
 		<DatabaseServerConfig 
 				name="test" 
-				JDBCUrl="jdbc:sqlserver://localhost:1533;databaseName=TestDB"				
+				JDBCUrl="jdbc:sqlserver://localhost:1533;databaseName=TestDB;trustServerCertificate=true"				
 				username="tester" 
 				password ="P@$$w0rd"
 				credentialProvider="testProvider" />
 		<DatabaseServerConfig 
 				name="transactional_test" 
-				JDBCUrl="jdbc:sqlserver://localhost:1533;databaseName=TestDB"				
+				JDBCUrl="jdbc:sqlserver://localhost:1533;databaseName=TestDB;trustServerCertificate=true"				
 				username="tester" 
 				password ="P@$$w0rd"
 				transactional="true" />
 		<DatabaseServerConfig 
 				name="demo" 
-				JDBCUrl="jdbc:sqlserver://10.1.0.5:1436;databaseName=Demo"				
+				JDBCUrl="jdbc:sqlserver://10.1.0.5:1436;databaseName=Demo;trustServerCertificate=true"				
 				username="demo" 
 				password ="Test1234!"
 				credentialProvider="testProvider" />		
 		<DatabaseServerConfig 
 				name="testdbcontext" 
-				JDBCUrl="jdbc:sqlserver://localhost:1533"				
+				JDBCUrl="jdbc:sqlserver://localhost:1533;trustServerCertificate=true"				
 				username="tester" 
 				password ="P@$$w0rd"
 				 />

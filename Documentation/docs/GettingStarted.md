@@ -47,7 +47,7 @@ The pom.xml should have the following contents:
 		<dependency>
 		    <groupId>com.microsoft.sqlserver</groupId>
 		    <artifactId>mssql-jdbc</artifactId>
-		    <version>7.4.1.jre8</version>
+		    <version>13.6.0.jre11</version>
 		</dependency>
   </dependencies>
 
@@ -56,7 +56,7 @@ The pom.xml should have the following contents:
        <plugin>
          <groupId>org.apache.maven.plugins</groupId>
          <artifactId>maven-compiler-plugin</artifactId>
-         <version>3.7.0</version>
+         <version>3.16.0</version>
          <configuration>
            <release>17</release>
             <encoding>UTF-8</encoding>          

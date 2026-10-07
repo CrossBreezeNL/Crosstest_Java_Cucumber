@@ -1,13 +1,13 @@
 package com.xbreeze.xtest.test;
 
-import org.junit.platform.suite.api.SelectClasspathResource;
+import org.junit.platform.suite.api.SelectPackages;
 import org.junit.platform.suite.api.Suite;
 
 /**
- * JUnit 5 Suite class to run Cucumber tests in the features folder.
+ * JUnit Platform Suite class to run Cucumber tests in the features package.
  * @author Harmen
  */
 @Suite
-@SelectClasspathResource("features")
+@SelectPackages("features")
 public class TestCrossTest {
 }

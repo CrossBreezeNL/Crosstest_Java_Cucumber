@@ -23,7 +23,7 @@
 package com.xbreeze.xtest.config;
 
 
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlAttribute;
 import com.xbreeze.xtest.exception.XTestException;
 
 public class DatabaseConfig {
