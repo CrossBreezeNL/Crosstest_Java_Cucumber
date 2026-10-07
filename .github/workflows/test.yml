@@ -105,6 +105,28 @@ jobs:
             TestCrossTest/target/cucumber-report.html
           if-no-files-found: ignore
 
+      # The library jars are built with --release 17, so they are the same on every Java version: publish them once.
+      # Without a status function in the condition, these steps only run when the build and all tests passed.
+      - name: Collect jars
+        if: matrix.java == '17'
+        run: |
+          mkdir -p dist
+          cp CrossTest/target/CrossTestCore-*.jar \
+             CrossTestSteps/target/CrossTest-*.jar \
+             CucumberDataComparison/target/CucumberDataComparison-*.jar \
+             TeradataCustomDataTypes/target/TeradataCustomDataTypes-*.jar \
+             Execution/InformaticaPowerCenter/target/CrossTestInformaticaPowerCenter-*.jar \
+             dist/
+          ls -l dist
+
+      - name: Upload jars
+        if: matrix.java == '17'
+        uses: actions/upload-artifact@v7
+        with:
+          name: crosstest-jars
+          path: dist/*.jar
+          if-no-files-found: error
+
   # Combines the results of all Java versions into one job summary.
   summary:
     name: Test summary
